@@ -212,19 +212,19 @@
             };
 
             const menuItems = [
-                { id: 1, title: 'JADUAL WAKTU KELAS', subtitle: 'Rujukan jadual waktu pembelajaran murid', icon: 'calendar-clock', color: 'text-blue-600', bgColor: 'bg-blue-100', url: 'https://drive.google.com/file/d/17KQM4rxuI0wKLjYOf-SryTiFAVirJJ6N/view?usp=drivesdk' },
-                { id: 2, title: 'JADUAL PERJUMPAAN KOKURIKULUM', subtitle: 'Aktiviti sukan dan unit beruniform', icon: 'trophy', color: 'text-amber-600', bgColor: 'bg-amber-100', url: 'https://jadualperjumpaankoko.sekolah-8943-cm1.workers.dev/' },
-                { id: 3, title: 'KELAB DAN PERSATUAN', subtitle: 'Maklumat aktiviti kelab & persatuan', icon: 'users', color: 'text-purple-600', bgColor: 'bg-purple-100', url: 'https://senaraiahlikelab.sekolah-8943-cm1.workers.dev/' },
-                { id: 4, title: 'RUMAH SUKAN', subtitle: 'Senarai ahli dan aktiviti rumah sukan', icon: 'medal', color: 'text-emerald-600', bgColor: 'bg-emerald-100', popup: { title: 'Rumah Sukan', content: <div className="flex flex-col gap-2"><div className="p-3 bg-red-100 text-red-700 rounded-lg font-bold text-center shadow-sm">🔥 Charmander (Merah)</div><div className="p-3 bg-green-100 text-green-700 rounded-lg font-bold text-center shadow-sm">🍃 Bulbasaur (Hijau)</div><div className="p-3 bg-blue-100 text-blue-700 rounded-lg font-bold text-center shadow-sm">💧 Squirtle (Biru)</div></div> } },
-                { id: 5, title: 'JADUAL PENGGUNAAN BAJU', subtitle: 'Panduan pemakaian seragam sekolah', icon: 'shirt', color: 'text-cyan-600', bgColor: 'bg-cyan-100', popup: { title: 'Jadual Penggunaan Baju', content: <p className="text-gray-600 text-center py-4 font-medium">Maklumat sedang dikemaskini. Sila rujuk semula nanti.</p> } },
-                { id: 8, title: 'GALERI', subtitle: 'Gambar aktiviti dan program sekolah', icon: 'image', color: 'text-pink-600', bgColor: 'bg-pink-100', popup: { title: 'Galeri Sekolah', content: <p className="text-gray-600 text-center py-4 font-medium">Galeri sedang dikemaskini. Nantikan gambar-gambar menarik!</p> } },
-                { id: 11, title: 'PIBG', subtitle: 'Persatuan Ibu Bapa dan Guru', icon: 'heart-handshake', color: 'text-indigo-600', bgColor: 'bg-indigo-100', popup: { title: 'PIBG SKPK Miri', content: <p className="text-gray-600 text-center py-4 font-medium">Sistem PIBG sedang dalam proses penyelenggaraan. Harap maklum.</p> } }
+                { id: 1, title: 'JADUAL WAKTU KELAS', icon: 'calendar-clock', color: 'text-blue-600', bgColor: 'bg-blue-100', url: 'https://drive.google.com/file/d/17KQM4rxuI0wKLjYOf-SryTiFAVirJJ6N/view?usp=drivesdk' },
+                { id: 2, title: 'JADUAL PERJUMPAAN KOKURIKULUM', icon: 'trophy', color: 'text-amber-600', bgColor: 'bg-amber-100', url: 'https://jadualperjumpaankoko.sekolah-8943-cm1.workers.dev/' },
+                { id: 3, title: 'KELAB DAN PERSATUAN', icon: 'users', color: 'text-purple-600', bgColor: 'bg-purple-100', url: 'https://senaraiahlikelab.sekolah-8943-cm1.workers.dev/' },
+                { id: 4, title: 'RUMAH SUKAN', icon: 'medal', color: 'text-emerald-600', bgColor: 'bg-emerald-100', popup: { title: 'Rumah Sukan', content: <div className="grid grid-cols-1 gap-4"><div className="flex flex-col items-center bg-red-50 p-4 rounded-xl border border-red-100"><img src="charmander.png" alt="Charmander" className="w-24 h-24 object-contain mb-2"/><span className="font-bold text-red-700">Charmander (Merah)</span></div><div className="flex flex-col items-center bg-green-50 p-4 rounded-xl border border-green-100"><img src="bulbasaur.png" alt="Bulbasaur" className="w-24 h-24 object-contain mb-2"/><span className="font-bold text-green-700">Bulbasaur (Hijau)</span></div><div className="flex flex-col items-center bg-blue-50 p-4 rounded-xl border border-blue-100"><img src="squirtle.png" alt="Squirtle" className="w-24 h-24 object-contain mb-2"/><span className="font-bold text-blue-700">Squirtle (Biru)</span></div></div> } },
+                { id: 5, title: 'JADUAL PENGGUNAAN BAJU', icon: 'shirt', color: 'text-cyan-600', bgColor: 'bg-cyan-100', popup: { title: 'Jadual Penggunaan Baju', content: <p className="text-gray-600 text-center py-4 font-medium">Maklumat sedang dikemaskini. Sila rujuk semula nanti.</p> } },
+                { id: 8, title: 'GALERI', icon: 'image', color: 'text-pink-600', bgColor: 'bg-pink-100', popup: { title: 'Galeri Sekolah', content: <p className="text-gray-600 text-center py-4 font-medium">Galeri sedang dikemaskini. Nantikan gambar-gambar menarik!</p> } },
+                { id: 11, title: 'PIBG', icon: 'heart-handshake', color: 'text-indigo-600', bgColor: 'bg-indigo-100', popup: { title: 'PIBG SKPK Miri', content: <p className="text-gray-600 text-center py-4 font-medium">Sistem PIBG sedang dalam proses penyelenggaraan. Harap maklum.</p> } }
             ];
 
             const socialItems = [
-                { id: 6, title: 'FACEBOOK', icon: 'facebook', color: 'text-blue-700', bgColor: 'bg-blue-50', url: 'https://www.facebook.com/share/1Bf7RjqtBB/?mibextid=wwXIfr' },
-                { id: 7, title: 'YOUTUBE', icon: 'youtube', color: 'text-red-600', bgColor: 'bg-red-50', url: 'https://youtube.com/@skpkmiri?si=J8OeVIwXhJkgBOKc' },
-                { id: 9, title: 'TIKTOK', icon: 'music', color: 'text-black', bgColor: 'bg-gray-200', url: 'https://www.tiktok.com/@skpkmiri?_r=1&_t=ZS-97xcwVuLjOC' },
+                { id: 6, title: 'FACEBOOK', customIcon: 'facebook.png', url: 'https://www.facebook.com/share/1Bf7RjqtBB/?mibextid=wwXIfr' },
+                { id: 7, title: 'YOUTUBE', customIcon: 'youtube.png', url: 'https://youtube.com/@skpkmiri?si=J8OeVIwXhJkgBOKc' },
+                { id: 9, title: 'TIKTOK', customIcon: 'tiktok.png', url: 'https://www.tiktok.com/@skpkmiri?_r=1&_t=ZS-97xcwVuLjOC' },
                 { id: 10, title: 'LAMAN WEB', icon: 'globe', color: 'text-teal-600', bgColor: 'bg-teal-50', popup: { title: 'Laman Web Sekolah', content: <p className="text-orange-600 text-center py-4 font-medium">Laman web sedang diselenggara. Kami akan kembali beroperasi secepat mungkin.</p> } }
             ];
 
@@ -325,9 +325,15 @@
                                 <div className="grid grid-cols-2 gap-3">
                                     {socialItems.map((item) => (
                                         <button key={item.id} onClick={() => handleItemClick(item)} className="bg-white border border-gray-100 p-4 rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center gap-2 active:scale-[0.98] group text-center">
-                                            <div className={`p-3 rounded-full ${item.bgColor} ${item.color} group-hover:scale-110 transition-transform`}>
-                                                <Icon name={item.icon} size={24} />
-                                            </div>
+                                            {item.customIcon ? (
+                                                <div className="w-12 h-12 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                    <img src={item.customIcon} alt={item.title} className="w-full h-full object-contain" />
+                                                </div>
+                                            ) : (
+                                                <div className={`p-3 rounded-full ${item.bgColor} ${item.color} group-hover:scale-110 transition-transform`}>
+                                                    <Icon name={item.icon} size={24} />
+                                                </div>
+                                            )}
                                             <div>
                                                 <h3 className="font-semibold text-gray-800 text-[11px]">{item.title}</h3>
                                             </div>
