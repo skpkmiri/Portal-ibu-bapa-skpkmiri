@@ -4,6 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Portal SKPK Miri</title>
+    
+    <!-- === TAMBAHAN KOD UNTUK IKON HOME SCREEN (PWA / SHORTCUT) === -->
+    <!-- Ikon standard untuk pelayar (Browser Tab / Laptop Shortcut) -->
+    <link rel="icon" type="image/png" href="logo.png">
+    
+    <!-- Ikon resolusi tinggi untuk Android (Add to Home Screen) -->
+    <link rel="icon" type="image/png" sizes="192x192" href="logo.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="logo.png">
+    
+    <!-- Ikon khas untuk peranti Apple / iOS (iPhone & iPad) -->
+    <link rel="apple-touch-icon" href="logo.png">
+    
+    <!-- Tetapan untuk menampakkan aplikasi seperti "App" sebenar apabila dibuka (Tanpa bar URL) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <!-- ============================================================== -->
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- React & ReactDOM -->
@@ -295,7 +313,6 @@
                                             </div>
                                             <div className="flex-1 text-left">
                                                 <h3 className="font-semibold text-gray-800 text-sm">{item.title}</h3>
-                                                <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-1">{item.subtitle}</p>
                                             </div>
                                             <div className="text-gray-300 group-hover:text-blue-500 transition-colors">
                                                 <Icon name="chevron-right" size={20} />
