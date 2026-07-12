@@ -1,4 +1,219 @@
-<!-- ... existing code ... -->
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Portal SKPK Miri</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Firebase SDK (Versi Compat untuk HTML standalone) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    
+    <style>
+        body { margin: 0; padding: 0; background-color: #f1f5f9; font-family: 'Inter', sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // 1. KONFIGURASI FIREBASE ANDA
+        const firebaseConfig = {
+            apiKey: "AIzaSyATLymPIGARVMIUTYSyqPN6PFL90IcUI0w",
+            authDomain: "portal-ibubapa-skpk-miri.firebaseapp.com",
+            projectId: "portal-ibubapa-skpk-miri",
+            storageBucket: "portal-ibubapa-skpk-miri.firebasestorage.app",
+            messagingSenderId: "303742388032",
+            appId: "1:303742388032:web:38ce6d0c7092132ab5dca5",
+            measurementId: "G-W5Z4TPPW14"
+        };
+
+        // 2. INITIALIZE FIREBASE & FIRESTORE
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+
+        const Icon = ({ name, size = 24, className = "" }) => {
+            const spanRef = React.useRef(null);
+            
+            React.useEffect(() => {
+                if (spanRef.current && window.lucide) {
+                    spanRef.current.innerHTML = `<i data-lucide="${name}"></i>`;
+                    window.lucide.createIcons({
+                        root: spanRef.current,
+                        attrs: {
+                            class: className,
+                            width: size,
+                            height: size,
+                            'stroke-width': 2
+                        }
+                    });
+                }
+            }, [name, size, className]);
+
+            return <span ref={spanRef} className="inline-flex items-center justify-center"></span>;
+        };
+
+        const App = () => {
+            const [isRefreshing, setIsRefreshing] = React.useState(false);
+            const [showModal, setShowModal] = React.useState(false);
+            const [modalContent, setModalContent] = React.useState({ title: '', content: null });
+            const [showAnnouncementsList, setShowAnnouncementsList] = React.useState(false);
+            
+            // State Pengumuman ditarik dari Firebase
+            const [announcements, setAnnouncements] = React.useState([]);
+
+            const [isTeacher, setIsTeacher] = React.useState(false);
+            const [showAuthModal, setShowAuthModal] = React.useState(false);
+            const [showAddAnnouncementModal, setShowAddAnnouncementModal] = React.useState(false);
+            const [icInput, setIcInput] = React.useState('');
+            const [loginError, setLoginError] = React.useState('');
+            
+            // State untuk form pengumuman baru
+            const [newAnnouncement, setNewAnnouncement] = React.useState('');
+            const [newContact, setNewContact] = React.useState('');
+
+            // 3. FETCH PENGUMUMAN DARI FIREBASE (REAL-TIME)
+            React.useEffect(() => {
+                const unsubscribe = db.collection('pengumuman').onSnapshot(
+                    (snapshot) => {
+                        const anns = snapshot.docs.map(doc => ({
+                            id: doc.id,
+                            ...doc.data()
+                        }));
+                        
+                        // Susun dari yang paling baru ke lama
+                        anns.sort((a, b) => {
+                            const timeA = a.createdAt?.toMillis() || 0;
+                            const timeB = b.createdAt?.toMillis() || 0;
+                            return timeB - timeA;
+                        });
+                        
+                        setAnnouncements(anns);
+                    },
+                    (error) => {
+                        console.error("Ralat mengambil data pengumuman: ", error);
+                    }
+                );
+
+                // Hentikan langganan jika komponen ditutup
+                return () => unsubscribe();
+            }, []);
+
+            const handleRefresh = () => {
+                setIsRefreshing(true);
+                setTimeout(() => setIsRefreshing(false), 1000);
+            };
+
+            const handleItemClick = (item) => {
+                if (item.url) {
+                    window.open(item.url, '_blank');
+                } else if (item.popup) {
+                    setModalContent(item.popup);
+                    setShowModal(true);
+                }
+            };
+
+            // FUNGSI LOG MASUK GURU (Guna Google Sheets CSV)
+            const handleTeacherLogin = async (e) => {
+                e.preventDefault();
+                const cleanIC = icInput.replace(/[^0-9]/g, '');
+                
+                if (cleanIC.length >= 12) {
+                    setLoginError('Menyemak pangkalan data...'); 
+                    
+                    try {
+                        const timestamp = new Date().getTime();
+                        const csvUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vQlw9DX7KTwL6BBPxhAUJ6TWAwfNVylx_wC6FuE2LgJE588pMkmZZegTtjnbFVU7FHwYYZ5EEOvYOen/pub?output=csv&nocache=${timestamp}`;
+                        
+                        const response = await fetch(csvUrl);
+                        const text = await response.text();
+                        
+                        const isValid = text.split(/\r?\n/).some(row => {
+                            const cleanedRow = row.replace(/[^0-9]/g, ''); 
+                            return cleanedRow.includes(cleanIC);
+                        });
+                        
+                        if (isValid) {
+                            setIsTeacher(true);
+                            setShowAuthModal(false);
+                            setIcInput('');
+                            setLoginError('');
+                        } else {
+                            setLoginError('Akses ditolak: Nombor IC tiada dalam senarai kebenaran.');
+                        }
+                    } catch (error) {
+                        setLoginError('Ralat sistem semasa berhubung dengan pangkalan data.');
+                        console.error(error);
+                    }
+                } else {
+                    setLoginError('Sila masukkan sekurang-kurangnya 12 digit nombor.');
+                }
+            };
+
+            // 4. HANTAR PENGUMUMAN KE FIREBASE
+            const handleAddAnnouncement = async (e) => {
+                e.preventDefault();
+                if (newAnnouncement.trim() !== '') {
+                    const today = new Date();
+                    const dateOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+                    const formattedDate = today.toLocaleDateString('ms-MY', dateOptions);
+
+                    try {
+                        // Tambah rekod baru ke koleksi 'pengumuman'
+                        await db.collection('pengumuman').add({
+                            text: newAnnouncement,
+                            date: formattedDate,
+                            contactPerson: newContact.trim(),
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp() // Masa automatik dari server
+                        });
+                        
+                        // Reset form
+                        setNewAnnouncement('');
+                        setNewContact('');
+                        setShowAddAnnouncementModal(false);
+                    } catch (error) {
+                        console.error("Ralat menambah pengumuman: ", error);
+                        alert("Gagal memuat naik pengumuman. Sila periksa sambungan internet atau Security Rules Firebase.");
+                    }
+                }
+            };
+
+            const menuItems = [
+                { id: 1, title: 'JADUAL WAKTU KELAS', subtitle: 'Rujukan jadual waktu pembelajaran murid', icon: 'calendar-clock', color: 'text-blue-600', bgColor: 'bg-blue-100', url: 'https://drive.google.com/file/d/17KQM4rxuI0wKLjYOf-SryTiFAVirJJ6N/view?usp=drivesdk' },
+                { id: 2, title: 'JADUAL PERJUMPAAN KOKURIKULUM', subtitle: 'Aktiviti sukan dan unit beruniform', icon: 'trophy', color: 'text-amber-600', bgColor: 'bg-amber-100', url: 'https://jadualperjumpaankoko.sekolah-8943-cm1.workers.dev/' },
+                { id: 3, title: 'KELAB DAN PERSATUAN', subtitle: 'Maklumat aktiviti kelab & persatuan', icon: 'users', color: 'text-purple-600', bgColor: 'bg-purple-100', url: 'https://senaraiahlikelab.sekolah-8943-cm1.workers.dev/' },
+                { id: 4, title: 'RUMAH SUKAN', subtitle: 'Senarai ahli dan aktiviti rumah sukan', icon: 'medal', color: 'text-emerald-600', bgColor: 'bg-emerald-100', popup: { title: 'Rumah Sukan', content: <div className="flex flex-col gap-2"><div className="p-3 bg-red-100 text-red-700 rounded-lg font-bold text-center shadow-sm">🔥 Charmander (Merah)</div><div className="p-3 bg-green-100 text-green-700 rounded-lg font-bold text-center shadow-sm">🍃 Bulbasaur (Hijau)</div><div className="p-3 bg-blue-100 text-blue-700 rounded-lg font-bold text-center shadow-sm">💧 Squirtle (Biru)</div></div> } },
+                { id: 5, title: 'JADUAL PENGGUNAAN BAJU', subtitle: 'Panduan pemakaian seragam sekolah', icon: 'shirt', color: 'text-cyan-600', bgColor: 'bg-cyan-100', popup: { title: 'Jadual Penggunaan Baju', content: <p className="text-gray-600 text-center py-4 font-medium">Maklumat sedang dikemaskini. Sila rujuk semula nanti.</p> } },
+                { id: 8, title: 'GALERI', subtitle: 'Gambar aktiviti dan program sekolah', icon: 'image', color: 'text-pink-600', bgColor: 'bg-pink-100', popup: { title: 'Galeri Sekolah', content: <p className="text-gray-600 text-center py-4 font-medium">Galeri sedang dikemaskini. Nantikan gambar-gambar menarik!</p> } },
+                { id: 11, title: 'PIBG', subtitle: 'Persatuan Ibu Bapa dan Guru', icon: 'heart-handshake', color: 'text-indigo-600', bgColor: 'bg-indigo-100', popup: { title: 'PIBG SKPK Miri', content: <p className="text-gray-600 text-center py-4 font-medium">Sistem PIBG sedang dalam proses penyelenggaraan. Harap maklum.</p> } }
+            ];
+
+            const socialItems = [
+                { id: 6, title: 'FACEBOOK', icon: 'facebook', color: 'text-blue-700', bgColor: 'bg-blue-50', url: 'https://www.facebook.com/share/1Bf7RjqtBB/?mibextid=wwXIfr' },
+                { id: 7, title: 'YOUTUBE', icon: 'youtube', color: 'text-red-600', bgColor: 'bg-red-50', url: 'https://youtube.com/@skpkmiri?si=J8OeVIwXhJkgBOKc' },
+                { id: 9, title: 'TIKTOK', icon: 'music', color: 'text-black', bgColor: 'bg-gray-200', url: 'https://www.tiktok.com/@skpkmiri?_r=1&_t=ZS-97xcwVuLjOC' },
+                { id: 10, title: 'LAMAN WEB', icon: 'globe', color: 'text-teal-600', bgColor: 'bg-teal-50', popup: { title: 'Laman Web Sekolah', content: <p className="text-orange-600 text-center py-4 font-medium">Laman web sedang diselenggara. Kami akan kembali beroperasi secepat mungkin.</p> } }
+            ];
+
+            return (
+                <div className="min-h-screen bg-slate-100 flex justify-center font-sans">
+                    <div className="w-full max-w-md bg-white shadow-2xl flex flex-col relative pb-16 overflow-hidden h-screen">
+                        
                         {/* Red Announcement Bar (Top) */}
                         {announcements.length > 0 && (
                             <div className="bg-red-600 text-white px-3 py-2 flex items-center shadow-md z-20 shrink-0">
@@ -21,6 +236,7 @@
                             <div className="flex items-center gap-3">
                                 {/* Bahagian Logo dan Tajuk Dikemas Kini */}
                                 <div className="h-10 w-10 rounded-full overflow-hidden border-2 border-gray-100 flex items-center justify-center shrink-0">
+                                    {/* NOTA: SILA TUKAR 'src' DI BAWAH KEPADA PAUTAN LOGO SEKOLAH SEBENAR ANDA */}
                                     <img 
                                         src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/1200px-React-icon.svg.png" 
                                         alt="Logo SKPK Miri" 
@@ -43,4 +259,208 @@
                                     <button onClick={() => setIsTeacher(false)} className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors" title="Log Keluar">
                                         <Icon name="log-out" size={18} />
                                     </button>
-<!-- ... existing code ... -->
+                                )}
+                                <button 
+                                    onClick={() => isTeacher ? setShowAddAnnouncementModal(true) : setShowAuthModal(true)}
+                                    className={`p-2 rounded-full transition-colors active:scale-95 flex items-center justify-center ${isTeacher ? 'bg-blue-100 text-blue-700' : 'text-gray-500 hover:bg-gray-100'}`}
+                                    title={isTeacher ? "Tambah Pengumuman" : "Log Masuk Guru"}
+                                >
+                                    <Icon name={isTeacher ? "plus" : "user-cog"} size={20} />
+                                </button>
+                                <button onClick={handleRefresh} className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors active:scale-95">
+                                    <div className={`${isRefreshing ? 'animate-spin text-blue-600' : ''}`}>
+                                        <Icon name="rotate-cw" size={22} />
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Scrollable Content */}
+                        <div className="flex-1 overflow-y-auto hide-scrollbar">
+                            
+                            {/* Welcome Banner */}
+                            <div className="px-4 py-4 bg-gradient-to-r from-blue-600 to-blue-400 text-white mx-4 mt-4 rounded-2xl shadow-md">
+                                <h2 className="text-lg font-semibold mb-1">Selamat Datang!</h2>
+                                <p className="text-xs text-blue-100 opacity-90 leading-relaxed">
+                                    Dapatkan maklumat terkini dan jadual anak-anak anda di sini dengan mudah.
+                                </p>
+                            </div>
+
+                            <div className="px-4 py-6">
+                                <h3 className="text-xs font-bold text-gray-400 mb-3 uppercase tracking-wider px-2">Menu Utama</h3>
+                                <div className="flex flex-col gap-3 mb-8">
+                                    {menuItems.map((item) => (
+                                        <button key={item.id} onClick={() => handleItemClick(item)} className="w-full bg-white border border-gray-100 p-4 rounded-2xl shadow-sm hover:shadow-md transition-all flex items-center gap-4 active:scale-[0.98] group">
+                                            <div className={`p-3 rounded-xl ${item.bgColor} ${item.color} group-hover:scale-110 transition-transform`}>
+                                                <Icon name={item.icon} size={24} />
+                                            </div>
+                                            <div className="flex-1 text-left">
+                                                <h3 className="font-semibold text-gray-800 text-sm">{item.title}</h3>
+                                                <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-1">{item.subtitle}</p>
+                                            </div>
+                                            <div className="text-gray-300 group-hover:text-blue-500 transition-colors">
+                                                <Icon name="chevron-right" size={20} />
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <h3 className="text-xs font-bold text-gray-400 mb-3 uppercase tracking-wider px-2">Media Sosial</h3>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {socialItems.map((item) => (
+                                        <button key={item.id} onClick={() => handleItemClick(item)} className="bg-white border border-gray-100 p-4 rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center gap-2 active:scale-[0.98] group text-center">
+                                            <div className={`p-3 rounded-full ${item.bgColor} ${item.color} group-hover:scale-110 transition-transform`}>
+                                                <Icon name={item.icon} size={24} />
+                                            </div>
+                                            <div>
+                                                <h3 className="font-semibold text-gray-800 text-[11px]">{item.title}</h3>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                                
+                                <div className="mt-10 text-center pb-4">
+                                    <p className="text-[10px] text-gray-400">© 2026 SK Pendidikan Khas Miri</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Bottom Navigation */}
+                        <div className="absolute bottom-0 w-full bg-white border-t border-gray-200 flex justify-around items-center py-2 px-6 pb-safe z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] shrink-0">
+                            <button className="flex flex-col items-center gap-1 p-2 text-blue-600">
+                                <Icon name="home" size={24} />
+                                <span className="text-[10px] font-medium">Utama</span>
+                            </button>
+                            <button onClick={() => setShowAnnouncementsList(true)} className="flex flex-col items-center gap-1 p-2 text-gray-400 hover:text-blue-600 transition-colors relative">
+                                <Icon name="bell" size={24} />
+                                <span className="text-[10px] font-medium">Pengumuman</span>
+                                {announcements.length > 0 && (
+                                    <span className="absolute top-2 right-4 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                                )}
+                            </button>
+                        </div>
+
+                        {/* Modal Senarai Pengumuman */}
+                        {showAnnouncementsList && (
+                            <div className="absolute inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4" onClick={() => setShowAnnouncementsList(false)}>
+                                <div className="bg-gray-50 sm:rounded-3xl rounded-t-3xl p-6 w-full max-w-md h-[80%] sm:h-auto sm:max-h-[80%] shadow-2xl flex flex-col transition-transform" onClick={(e) => e.stopPropagation()}>
+                                    <div className="flex justify-between items-center mb-4 border-b border-gray-200 pb-4 shrink-0">
+                                        <h3 className="font-bold text-gray-800 text-lg flex items-center gap-2">
+                                            <div className="text-blue-600"><Icon name="bell" size={20}/></div>
+                                            Senarai Pengumuman
+                                        </h3>
+                                        <button onClick={() => setShowAnnouncementsList(false)} className="bg-gray-200 hover:bg-gray-300 text-gray-700 p-2 rounded-full transition-colors text-sm font-semibold">
+                                            Tutup
+                                        </button>
+                                    </div>
+                                    <div className="flex-1 overflow-y-auto pr-2 pb-4 hide-scrollbar">
+                                        {announcements.length > 0 ? (
+                                            <div className="flex flex-col gap-4">
+                                                {announcements.map((ann) => (
+                                                    <div key={ann.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-blue-500 relative">
+                                                        <div className="flex justify-between items-start mb-2">
+                                                            <p className="text-[11px] text-gray-400 font-medium flex items-center gap-1">
+                                                                <Icon name="calendar" size={12} /> {ann.date}
+                                                            </p>
+                                                        </div>
+                                                        <p className="text-sm text-gray-700 leading-relaxed">{ann.text}</p>
+                                                        
+                                                        {ann.contactPerson && (
+                                                            <div className="mt-3 pt-3 border-t border-gray-50 flex items-center gap-2 text-blue-600">
+                                                                <Icon name="user" size={14} />
+                                                                <span className="text-[11px] font-semibold">Sebarang pertanyaan hubungi: {ann.contactPerson}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                                                <div className="mb-2 opacity-20"><Icon name="bell" size={48} /></div>
+                                                <p className="text-sm">Tiada pengumuman setakat ini.</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Modal Popup (General) */}
+                        {showModal && (
+                            <div className="absolute inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setShowModal(false)}>
+                                <div className="bg-white rounded-3xl p-6 w-full max-w-[320px] shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                                    <h3 className="font-bold text-gray-800 text-lg mb-4 text-center border-b pb-2">{modalContent.title}</h3>
+                                    <div className="mb-6 text-sm">{modalContent.content}</div>
+                                    <button onClick={() => setShowModal(false)} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl py-3 transition-colors text-sm">
+                                        Tutup
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Auth Modal untuk Guru */}
+                        {showAuthModal && (
+                            <div className="absolute inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setShowAuthModal(false)}>
+                                <div className="bg-white rounded-3xl p-6 w-full max-w-[320px] shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                                    <div className="flex justify-center mb-4">
+                                        <div className="bg-blue-100 p-4 rounded-full text-blue-600"><Icon name="lock" size={32} /></div>
+                                    </div>
+                                    <h3 className="font-bold text-gray-800 text-lg mb-2 text-center">Log Masuk Guru</h3>
+                                    <p className="text-[11px] text-gray-500 text-center mb-6">Sila masukkan nombor Kad Pengenalan anda.</p>
+                                    <form onSubmit={handleTeacherLogin}>
+                                        <input type="text" placeholder="Contoh: 801231135010" value={icInput} onChange={(e) => setIcInput(e.target.value)} maxLength={12} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2" />
+                                        {loginError && <p className="text-[11px] text-red-500 mb-4 px-1 font-semibold">{loginError}</p>}
+                                        <div className="flex gap-2 mt-4">
+                                            <button type="button" onClick={() => { setShowAuthModal(false); setLoginError(''); setIcInput(''); }} className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl py-3 transition-colors text-sm">Batal</button>
+                                            <button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl py-3 transition-colors text-sm">Sahkan</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Modal Tambah Pengumuman Baru */}
+                        {showAddAnnouncementModal && (
+                            <div className="absolute inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setShowAddAnnouncementModal(false)}>
+                                <div className="bg-white rounded-3xl p-6 w-full max-w-[320px] shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                                    <h3 className="font-bold text-gray-800 text-lg mb-2 text-center border-b pb-3">Tambah Pengumuman</h3>
+                                    <form onSubmit={handleAddAnnouncement} className="mt-4">
+                                        
+                                        <label className="text-[11px] font-semibold text-gray-600 mb-1 block">Teks Pengumuman <span className="text-red-500">*</span></label>
+                                        <textarea 
+                                            placeholder="Sila masukkan pengumuman rasmi di sini..." 
+                                            value={newAnnouncement} 
+                                            onChange={(e) => setNewAnnouncement(e.target.value)} 
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[90px] resize-none mb-3" 
+                                            required 
+                                        />
+
+                                        <label className="text-[11px] font-semibold text-gray-600 mb-1 block">Guru / Rujukan untuk Dihubungi <span className="font-normal italic">(Tidak Wajib)</span></label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="Cth: Cikgu Ahmad / Pejabat" 
+                                            value={newContact} 
+                                            onChange={(e) => setNewContact(e.target.value)} 
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-5" 
+                                        />
+
+                                        <div className="flex gap-2">
+                                            <button type="button" onClick={() => setShowAddAnnouncementModal(false)} className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl py-3 transition-colors text-sm">Batal</button>
+                                            <button type="submit" className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl py-3 transition-colors flex items-center justify-center gap-2 text-sm">
+                                                <Icon name="plus" size={16} /> Siarkan
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
