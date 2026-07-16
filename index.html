@@ -50,29 +50,20 @@
         };
 
         const App = () => {
-            const [announcements, setAnnouncements] = React.useState([]);
             const [showModal, setShowModal] = React.useState(false);
             const [modalContent, setModalContent] = React.useState({ title: '', content: null });
             const [showSocialMenu, setShowSocialMenu] = React.useState(false);
             const [showRekodMenu, setShowRekodMenu] = React.useState(false);
 
-            React.useEffect(() => {
-                return db.collection('pengumuman').onSnapshot(snap => {
-                    const anns = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                    anns.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
-                    setAnnouncements(anns);
-                });
-            }, []);
-
             const menuItems = [
                 { id: 1, title: 'JADUAL WAKTU KELAS', icon: 'calendar-clock', color: 'text-blue-600', bgColor: 'bg-blue-100', url: 'https://drive.google.com/file/d/17KQM4rxuI0wKLjYOf-SryTiFAVirJJ6N/view?usp=drivesdk' },
                 { id: 2, title: 'JADUAL PERJUMPAAN KOKURIKULUM', icon: 'trophy', color: 'text-amber-600', bgColor: 'bg-amber-100', url: 'https://jadualperjumpaankoko.sekolah-8943-cm1.workers.dev/' },
                 { id: 3, title: 'KELAB DAN PERSATUAN', icon: 'users', color: 'text-purple-600', bgColor: 'bg-purple-100', url: 'https://senaraiahlikelab.sekolah-8943-cm1.workers.dev/' },
-                { id: 4, title: 'RUMAH SUKAN', icon: 'medal', color: 'text-emerald-600', bgColor: 'bg-emerald-100', popup: { title: 'Rumah Sukan', content: (
-                    <div className="grid grid-cols-1 gap-3">
-                        <button onClick={() => window.open('https://www.canva.com/design/DAGfgAn1odw/7yQsbNfTNSFrqwvH-V3qjw/view', '_blank')} className="rounded-xl overflow-hidden"><img src="charmander_2.png" className="w-full" /></button>
-                        <button onClick={() => window.open('https://www.canva.com/design/DAGfglCnsxw/8any-jTaFqAn2qrcoVKl5g/view', '_blank')} className="rounded-xl overflow-hidden"><img src="bulbasaur_2.png" className="w-full" /></button>
-                        <button onClick={() => window.open('https://www.canva.com/design/DAGfgodsqO8/lvZ0uMGdXc-vZWw2Otb4Bw/view', '_blank')} className="rounded-xl overflow-hidden"><img src="squirtle_2.png" className="w-full" /></button>
+                { id: 4, title: 'RUMAH SUKAN', icon: 'medal', color: 'text-emerald-600', bgColor: 'bg-emerald-100', popup: { title: 'Pilih Rumah Sukan', content: (
+                    <div className="grid grid-cols-3 gap-2">
+                        <button onClick={() => window.open('https://www.canva.com/design/DAGfgAn1odw/7yQsbNfTNSFrqwvH-V3qjw/view', '_blank')} className="p-1 rounded-lg overflow-hidden border"><img src="charmander.png" className="w-full" /></button>
+                        <button onClick={() => window.open('https://www.canva.com/design/DAGfglCnsxw/8any-jTaFqAn2qrcoVKl5g/view', '_blank')} className="p-1 rounded-lg overflow-hidden border"><img src="bulbasaur.png" className="w-full" /></button>
+                        <button onClick={() => window.open('https://www.canva.com/design/DAGfgodsqO8/lvZ0uMGdXc-vZWw2Otb4Bw/view', '_blank')} className="p-1 rounded-lg overflow-hidden border"><img src="squirtle.png" className="w-full" /></button>
                     </div>
                 )}},
                 { id: 5, title: 'JADUAL PENGGUNAAN BAJU', icon: 'shirt', color: 'text-cyan-600', bgColor: 'bg-cyan-100', popup: { title: 'Jadual Pemakaian Baju', content: <img src="jadual pemakaian baju.jpg" className="w-full rounded-lg" /> }}
@@ -94,7 +85,6 @@
                                         <Icon name="chevron-right" size={20} className="text-gray-300" />
                                     </button>
                                 ))}
-                                {/* REKOD AMALAN MURID */}
                                 <button onClick={() => setShowRekodMenu(!showRekodMenu)} className="w-full bg-white border p-4 rounded-2xl shadow-sm flex items-center gap-4">
                                     <div className="p-3 rounded-xl bg-orange-100 text-orange-600"><Icon name="clipboard-list" /></div>
                                     <h3 className="font-semibold text-gray-800 text-sm flex-1 text-left">Rekod Amalan Murid</h3>
@@ -106,7 +96,6 @@
                                         <button onClick={() => alert('Sedang dikemaskini')} className="p-4 bg-slate-50 rounded-xl text-left text-sm font-medium text-red-700">⚠ Rekod Salah Laku</button>
                                     </div>
                                 )}
-                                {/* MEDIA SOSIAL */}
                                 <button onClick={() => setShowSocialMenu(!showSocialMenu)} className="w-full bg-white border p-4 rounded-2xl shadow-sm flex items-center gap-4">
                                     <div className="p-3 rounded-xl bg-pink-100 text-pink-600"><Icon name="smartphone" /></div>
                                     <h3 className="font-semibold text-gray-800 text-sm flex-1 text-left">Media Sosial</h3>
@@ -141,4 +130,3 @@
     </script>
 </body>
 </html>
-```eof
