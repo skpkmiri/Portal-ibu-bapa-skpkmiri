@@ -9,8 +9,6 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     
     <link rel="apple-touch-icon" href="logo.png">
     <link rel="shortcut icon" href="logo.png">
@@ -25,19 +23,6 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const firebaseConfig = {
-            apiKey: "AIzaSyATLymPIGARVMIUTYSyqPN6PFL90IcUI0w",
-            authDomain: "portal-ibubapa-skpk-miri.firebaseapp.com",
-            projectId: "portal-ibubapa-skpk-miri",
-            storageBucket: "portal-ibubapa-skpk-miri.firebasestorage.app",
-            messagingSenderId: "303742388032",
-            appId: "1:303742388032:web:38ce6d0c7092132ab5dca5",
-            measurementId: "G-W5Z4TPPW14"
-        };
-
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
         const Icon = ({ name, size = 24, className = "" }) => {
             const spanRef = React.useRef(null);
             React.useEffect(() => {
@@ -59,23 +44,41 @@
                 { id: 1, title: 'JADUAL WAKTU KELAS', icon: 'calendar-clock', color: 'text-blue-600', bgColor: 'bg-blue-100', url: 'https://drive.google.com/file/d/17KQM4rxuI0wKLjYOf-SryTiFAVirJJ6N/view?usp=drivesdk' },
                 { id: 2, title: 'JADUAL PERJUMPAAN KOKURIKULUM', icon: 'trophy', color: 'text-amber-600', bgColor: 'bg-amber-100', url: 'https://jadualperjumpaankoko.sekolah-8943-cm1.workers.dev/' },
                 { id: 3, title: 'KELAB DAN PERSATUAN', icon: 'users', color: 'text-purple-600', bgColor: 'bg-purple-100', url: 'https://senaraiahlikelab.sekolah-8943-cm1.workers.dev/' },
-                { id: 4, title: 'RUMAH SUKAN', icon: 'medal', color: 'text-emerald-600', bgColor: 'bg-emerald-100', popup: { title: 'Pilih Rumah Sukan', content: (
-                    <div className="grid grid-cols-3 gap-2">
-                        <button onClick={() => window.open('https://www.canva.com/design/DAGfgAn1odw/7yQsbNfTNSFrqwvH-V3qjw/view', '_blank')} className="p-1 rounded-lg overflow-hidden border"><img src="charmander.png" className="w-full" /></button>
-                        <button onClick={() => window.open('https://www.canva.com/design/DAGfglCnsxw/8any-jTaFqAn2qrcoVKl5g/view', '_blank')} className="p-1 rounded-lg overflow-hidden border"><img src="bulbasaur.png" className="w-full" /></button>
-                        <button onClick={() => window.open('https://www.canva.com/design/DAGfgodsqO8/lvZ0uMGdXc-vZWw2Otb4Bw/view', '_blank')} className="p-1 rounded-lg overflow-hidden border"><img src="squirtle.png" className="w-full" /></button>
-                    </div>
-                )}},
-                { id: 5, title: 'JADUAL PENGGUNAAN BAJU', icon: 'shirt', color: 'text-cyan-600', bgColor: 'bg-cyan-100', popup: { title: 'Jadual Pemakaian Baju', content: <img src="jadual pemakaian baju.jpg" className="w-full rounded-lg" /> }}
+                { id: 4, title: 'RUMAH SUKAN', icon: 'medal', color: 'text-emerald-600', bgColor: 'bg-emerald-100', popup: { 
+                    title: 'Pilih Rumah Sukan', 
+                    content: (
+                        <div className="grid grid-cols-3 gap-3">
+                            <button onClick={() => window.open('https://www.canva.com/design/DAGfgAn1odw/7yQsbNfTNSFrqwvH-V3qjw/view', '_blank')} className="p-2 rounded-xl overflow-hidden border bg-gray-50 shadow-sm hover:scale-[1.05] transition-transform flex flex-col items-center justify-center">
+                                <img src="charmander_2.png" className="w-16 h-16 object-contain" alt="Charmander" />
+                            </button>
+                            <button onClick={() => window.open('https://www.canva.com/design/DAGfglCnsxw/8any-jTaFqAn2qrcoVKl5g/view', '_blank')} className="p-2 rounded-xl overflow-hidden border bg-gray-50 shadow-sm hover:scale-[1.05] transition-transform flex flex-col items-center justify-center">
+                                <img src="bulbasaur_2.png" className="w-16 h-16 object-contain" alt="Bulbasaur" />
+                            </button>
+                            <button onClick={() => window.open('https://www.canva.com/design/DAGfgodsqO8/lvZ0uMGdXc-vZWw2Otb4Bw/view', '_blank')} className="p-2 rounded-xl overflow-hidden border bg-gray-50 shadow-sm hover:scale-[1.05] transition-transform flex flex-col items-center justify-center">
+                                <img src="squirtle_2.png" className="w-16 h-16 object-contain" alt="Squirtle" />
+                            </button>
+                        </div>
+                    )
+                }},
+                { id: 5, title: 'JADUAL PENGGUNAAN BAJU', icon: 'shirt', color: 'text-cyan-600', bgColor: 'bg-cyan-100', popup: { 
+                    title: 'Jadual Pemakaian Baju', 
+                    content: (
+                        <div className="max-h-[60vh] overflow-y-auto rounded-lg border border-gray-100 bg-gray-50 flex justify-center">
+                            <img src="jadual pemakaian baju.jpg" className="w-full h-auto object-contain" alt="Jadual Baju" />
+                        </div>
+                    ) 
+                }}
             ];
 
             return (
                 <div className="min-h-screen bg-slate-100 flex justify-center">
                     <div className="w-full max-w-md bg-white shadow-2xl flex flex-col h-screen overflow-hidden">
-                        <div className="bg-white p-4 border-b flex items-center gap-3">
-                            <img src="logo.png" className="h-10 w-10 object-cover rounded-full" />
+                        
+                        <div className="bg-white p-4 border-b flex items-center gap-3 shrink-0">
+                            <img src="logo.png" className="h-10 w-10 object-cover rounded-full" alt="Logo" />
                             <h1 className="font-bold text-gray-800 uppercase">PORTAL SKPK MIRI</h1>
                         </div>
+                        
                         <div className="flex-1 overflow-y-auto p-4 hide-scrollbar">
                             <div className="flex flex-col gap-3">
                                 {menuItems.map(item => (
@@ -85,6 +88,8 @@
                                         <Icon name="chevron-right" size={20} className="text-gray-300" />
                                     </button>
                                 ))}
+                                
+                                {}
                                 <button onClick={() => setShowRekodMenu(!showRekodMenu)} className="w-full bg-white border p-4 rounded-2xl shadow-sm flex items-center gap-4">
                                     <div className="p-3 rounded-xl bg-orange-100 text-orange-600"><Icon name="clipboard-list" /></div>
                                     <h3 className="font-semibold text-gray-800 text-sm flex-1 text-left">Rekod Amalan Murid</h3>
@@ -96,6 +101,7 @@
                                         <button onClick={() => alert('Sedang dikemaskini')} className="p-4 bg-slate-50 rounded-xl text-left text-sm font-medium text-red-700">⚠ Rekod Salah Laku</button>
                                     </div>
                                 )}
+                                
                                 <button onClick={() => setShowSocialMenu(!showSocialMenu)} className="w-full bg-white border p-4 rounded-2xl shadow-sm flex items-center gap-4">
                                     <div className="p-3 rounded-xl bg-pink-100 text-pink-600"><Icon name="smartphone" /></div>
                                     <h3 className="font-semibold text-gray-800 text-sm flex-1 text-left">Media Sosial</h3>
@@ -103,9 +109,14 @@
                                 </button>
                                 {showSocialMenu && (
                                     <div className="grid grid-cols-2 gap-3">
-                                        {[ {name:'Laman Web', icon:'globe', link:'#'}, {name:'Facebook', icon:'facebook', link:'#'}, {name:'TikTok', icon:'music', link:'#'}, {name:'YouTube', icon:'youtube', link:'#'}].map((s,i) => (
-                                            <button key={i} className="bg-white border rounded-xl p-4 flex flex-col items-center gap-2">
-                                                <Icon name={s.icon} size={24} />
+                                        {[ 
+                                            {name:'Laman Web', icon:'globe', link:'#'}, 
+                                            {name:'Facebook', image:'facebook.png', link:'#'}, 
+                                            {name:'TikTok', image:'tiktok.png', link:'#'}, 
+                                            {name:'YouTube', image:'youtube.png', link:'#'}
+                                        ].map((s,i) => (
+                                            <button key={i} className="bg-white border rounded-xl p-4 flex flex-col items-center justify-center gap-3 shadow-sm hover:shadow-md transition-all">
+                                                {s.image ? <img src={s.image} className="w-8 h-8 object-contain" alt={s.name} /> : <Icon name={s.icon} size={28} className="text-gray-600" />}
                                                 <span className="text-xs font-bold text-gray-700">{s.name}</span>
                                             </button>
                                         ))}
@@ -113,15 +124,23 @@
                                 )}
                             </div>
                         </div>
+                        
+                        {}
                         {showModal && (
-                            <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setShowModal(false)}>
-                                <div className="bg-white rounded-3xl p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
-                                    <h3 className="font-bold text-center mb-4">{modalContent.title}</h3>
+                            <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setShowModal(false)}>
+                                <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="font-bold text-gray-800">{modalContent.title}</h3>
+                                        <button onClick={() => setShowModal(false)} className="bg-gray-100 p-2 rounded-full text-gray-500 hover:bg-gray-200 transition-colors">
+                                            <Icon name="x" size={18} />
+                                        </button>
+                                    </div>
                                     {modalContent.content}
-                                    <button onClick={() => setShowModal(false)} className="w-full mt-4 bg-blue-600 text-white rounded-xl py-3">Tutup</button>
+                                    <button onClick={() => setShowModal(false)} className="w-full mt-6 bg-blue-600 text-white rounded-xl py-3 font-semibold hover:bg-blue-700 transition-colors">Tutup</button>
                                 </div>
                             </div>
                         )}
+                        
                     </div>
                 </div>
             );
