@@ -44,30 +44,19 @@
                 { id: 1, title: 'JADUAL WAKTU KELAS', icon: 'calendar-clock', color: 'text-blue-600', bgColor: 'bg-blue-100', url: 'https://drive.google.com/file/d/17KQM4rxuI0wKLjYOf-SryTiFAVirJJ6N/view?usp=drivesdk' },
                 { id: 2, title: 'JADUAL PERJUMPAAN KOKURIKULUM', icon: 'trophy', color: 'text-amber-600', bgColor: 'bg-amber-100', url: 'https://jadualperjumpaankoko.sekolah-8943-cm1.workers.dev/' },
                 { id: 3, title: 'KELAB DAN PERSATUAN', icon: 'users', color: 'text-purple-600', bgColor: 'bg-purple-100', url: 'https://senaraiahlikelab.sekolah-8943-cm1.workers.dev/' },
-                { id: 4, title: 'RUMAH SUKAN', icon: 'medal', color: 'text-emerald-600', bgColor: 'bg-emerald-100', popup: { 
-                    title: 'Pilih Rumah Sukan', 
-                    content: (
-                        <div className="grid grid-cols-3 gap-3">
-                            <button onClick={() => window.open('https://www.canva.com/design/DAGfgAn1odw/7yQsbNfTNSFrqwvH-V3qjw/view', '_blank')} className="p-2 rounded-xl overflow-hidden border bg-gray-50 shadow-sm hover:scale-[1.05] transition-transform flex flex-col items-center justify-center">
-                                <img src="charmander_2.png" className="w-16 h-16 object-contain" alt="Charmander" />
-                            </button>
-                            <button onClick={() => window.open('https://www.canva.com/design/DAGfglCnsxw/8any-jTaFqAn2qrcoVKl5g/view', '_blank')} className="p-2 rounded-xl overflow-hidden border bg-gray-50 shadow-sm hover:scale-[1.05] transition-transform flex flex-col items-center justify-center">
-                                <img src="bulbasaur_2.png" className="w-16 h-16 object-contain" alt="Bulbasaur" />
-                            </button>
-                            <button onClick={() => window.open('https://www.canva.com/design/DAGfgodsqO8/lvZ0uMGdXc-vZWw2Otb4Bw/view', '_blank')} className="p-2 rounded-xl overflow-hidden border bg-gray-50 shadow-sm hover:scale-[1.05] transition-transform flex flex-col items-center justify-center">
-                                <img src="squirtle_2.png" className="w-16 h-16 object-contain" alt="Squirtle" />
-                            </button>
-                        </div>
-                    )
-                }},
-                { id: 5, title: 'JADUAL PENGGUNAAN BAJU', icon: 'shirt', color: 'text-cyan-600', bgColor: 'bg-cyan-100', popup: { 
-                    title: 'Jadual Pemakaian Baju', 
-                    content: (
-                        <div className="max-h-[60vh] overflow-y-auto rounded-lg border border-gray-100 bg-gray-50 flex justify-center">
-                            <img src="jadual pemakaian baju.jpg" className="w-full h-auto object-contain" alt="Jadual Baju" />
-                        </div>
-                    ) 
-                }}
+                { id: 4, title: 'RUMAH SUKAN', icon: 'medal', color: 'text-emerald-600', bgColor: 'bg-emerald-100', popup: { title: 'Pilih Rumah Sukan', content: (
+                    <div className="grid grid-cols-3 gap-2">
+                        <button onClick={() => window.open('https://www.canva.com/design/DAGfgAn1odw/7yQsbNfTNSFrqwvH-V3qjw/view', '_blank')} className="p-1 rounded-lg overflow-hidden border"><img src="charmander_2.png" className="w-full" alt="Charmander" /></button>
+                        <button onClick={() => window.open('https://www.canva.com/design/DAGfglCnsxw/8any-jTaFqAn2qrcoVKl5g/view', '_blank')} className="p-1 rounded-lg overflow-hidden border"><img src="bulbasaur_2.png" className="w-full" alt="Bulbasaur" /></button>
+                        <button onClick={() => window.open('https://www.canva.com/design/DAGfgodsqO8/lvZ0uMGdXc-vZWw2Otb4Bw/view', '_blank')} className="p-1 rounded-lg overflow-hidden border"><img src="squirtle_2.png" className="w-full" alt="Squirtle" /></button>
+                    </div>
+                )}},
+                { id: 5, title: 'JADUAL PENGGUNAAN BAJU', icon: 'shirt', color: 'text-cyan-600', bgColor: 'bg-cyan-100', popup: { title: 'Jadual Pemakaian Baju', content: (
+                    <div className="max-h-[60vh] overflow-y-auto">
+                        <img src="jadual pemakaian baju.jpg" className="w-full h-auto rounded-lg" alt="Jadual Baju" />
+                    </div>
+                ) }},
+                { id: 6, title: 'SURAT TIDAK HADIR', icon: 'mail', color: 'text-rose-600', bgColor: 'bg-rose-100', url: 'https://surattidakhadirmurid.sekolah-8943-cm1.workers.dev/' }
             ];
 
             return (
