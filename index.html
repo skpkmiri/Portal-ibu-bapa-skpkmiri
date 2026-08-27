@@ -12,9 +12,16 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     
-    <!-- Ikon Shortcut & Home Screen -->
-    <link rel="icon" type="image/png" href="logo.png">
+    <!-- Ikon Shortcut & Home Screen (Dikemas kini untuk Android & PC) -->
+    <link rel="icon" type="image/png" sizes="192x192" href="logo.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="logo.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="logo.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="logo.png">
+    <link rel="shortcut icon" href="logo.png">
     <link rel="apple-touch-icon" href="logo.png">
+    
+    <!-- Tetapan Web App Manifest (Untuk Android Add to Home Screen yang lebih baik) -->
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#ffffff">
