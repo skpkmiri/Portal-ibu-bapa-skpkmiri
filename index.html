@@ -3,8 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>Portal SKPK Miri</title>
     
+    <!-- Ikon Pelbagai Saiz dan Manifest Inline untuk Android & iOS -->
+    <link rel="icon" type="image/png" sizes="16x16" href="logo.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="logo.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="logo.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="shortcut icon" href="logo.png">
+    <link rel="manifest" href='data:application/manifest+json;base64,ewogICJuYW1lIjogIlBvcnRhbCBTS1BLIE1pcmkiLAogICJzaG9ydF9uYW1lIjogIlNLUEsgTWlyaSIsCiAgInN0YXJ0X3VybCI6ICIuLyIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI2YxZjVmOSIsCiAgInRoZW1lX2NvbG9yIjogIiNmMWY1ZjkiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJsb2dvLnBuZyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfQogIF0KfQ=='>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -12,23 +23,6 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-    
-    <!-- Ikon Shortcut & Home Screen (Dikemas kini untuk Android & PC) -->
-    <link rel="icon" type="image/png" sizes="192x192" href="logo.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="logo.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="logo.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="logo.png">
-    <link rel="shortcut icon" href="logo.png">
-    <link rel="apple-touch-icon" href="logo.png">
-    
-    <!-- Inline Manifest untuk memaksa Android mengenali logo.png sebagai ikon Home Screen -->
-    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiUG9ydGFsIFNLUEsgTWlyaSIsInNob3J0X25hbWUiOiJTS1BLIE1pcmkiLCJzdGFydF91cmwiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2ZmZmZmZiIsInRoZW1lX2NvbG9yIjoiI2ZmZmZmZiIsImljb25zIjpbeyJzcmMiOiJsb2dvLnBuZyIsInNpemVzIjoiMTkyeDE5MiIsInR5cGUiOiJpbWFnZS9wbmcifSx7InNyYyI6ImxvZ28ucG5nIiwic2l6ZXMiOiI1MTJ4NTEyIiwidHlwZSI6ImltYWdlL3BuZyJ9XX0=">
-    
-    <!-- Tetapan Web App Manifest -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#ffffff">
     
     <style>
         body { margin: 0; padding: 0; background-color: #f1f5f9; font-family: 'Inter', sans-serif; }
@@ -40,6 +34,19 @@
     <div id="root"></div>
 
     <script type="text/babel">
+        const firebaseConfig = {
+            apiKey: "AIzaSyATLymPIGARVMIUTYSyqPN6PFL90IcUI0w",
+            authDomain: "portal-ibubapa-skpk-miri.firebaseapp.com",
+            projectId: "portal-ibubapa-skpk-miri",
+            storageBucket: "portal-ibubapa-skpk-miri.firebasestorage.app",
+            messagingSenderId: "303742388032",
+            appId: "1:303742388032:web:38ce6d0c7092132ab5dca5",
+            measurementId: "G-W5Z4TPPW14"
+        };
+
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
         const Icon = ({ name, size = 24, className = "" }) => {
             const spanRef = React.useRef(null);
             React.useEffect(() => {
@@ -56,6 +63,35 @@
             const [modalContent, setModalContent] = React.useState({ title: '', content: null });
             const [showSocialMenu, setShowSocialMenu] = React.useState(false);
             const [showRekodMenu, setShowRekodMenu] = React.useState(false);
+            
+            // Analitik State
+            const [stats, setStats] = React.useState({ total: 0, today: 0 });
+            const hasCounted = React.useRef(false);
+
+            React.useEffect(() => {
+                // Logik mengira pelawat (Analitik)
+                const todayStr = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+                const statsRef = db.collection('analytics').doc('visitors');
+
+                if (!hasCounted.current) {
+                    statsRef.set({
+                        total: firebase.firestore.FieldValue.increment(1),
+                        [todayStr]: firebase.firestore.FieldValue.increment(1)
+                    }, { merge: true }).catch(err => console.log(err));
+                    hasCounted.current = true;
+                }
+
+                const unsubscribe = statsRef.onSnapshot(doc => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        setStats({
+                            total: data.total || 0,
+                            today: data[todayStr] || 0
+                        });
+                    }
+                });
+                return () => unsubscribe();
+            }, []);
 
             const menuItems = [
                 { id: 1, title: 'JADUAL WAKTU KELAS', icon: 'calendar-clock', color: 'text-blue-600', bgColor: 'bg-blue-100', url: 'https://drive.google.com/file/d/17KQM4rxuI0wKLjYOf-SryTiFAVirJJ6N/view?usp=drivesdk' },
@@ -63,33 +99,37 @@
                 { id: 3, title: 'KELAB DAN PERSATUAN', icon: 'users', color: 'text-purple-600', bgColor: 'bg-purple-100', url: 'https://senaraiahlikelab.sekolah-8943-cm1.workers.dev/' },
                 { id: 4, title: 'RUMAH SUKAN', icon: 'medal', color: 'text-emerald-600', bgColor: 'bg-emerald-100', popup: { title: 'Pilih Rumah Sukan', content: (
                     <div className="grid grid-cols-3 gap-2">
-                        <button onClick={() => window.open('https://www.canva.com/design/DAGfgAn1odw/7yQsbNfTNSFrqwvH-V3qjw/view', '_blank')} className="p-1 rounded-lg overflow-hidden border shadow-sm hover:shadow-md transition-shadow"><img src="charmander_2.png" className="w-full" alt="Charmander" /></button>
-                        <button onClick={() => window.open('https://www.canva.com/design/DAGfglCnsxw/8any-jTaFqAn2qrcoVKl5g/view', '_blank')} className="p-1 rounded-lg overflow-hidden border shadow-sm hover:shadow-md transition-shadow"><img src="bulbasaur_2.png" className="w-full" alt="Bulbasaur" /></button>
-                        <button onClick={() => window.open('https://www.canva.com/design/DAGfgodsqO8/lvZ0uMGdXc-vZWw2Otb4Bw/view', '_blank')} className="p-1 rounded-lg overflow-hidden border shadow-sm hover:shadow-md transition-shadow"><img src="squirtle_2.png" className="w-full" alt="Squirtle" /></button>
+                        <button onClick={() => window.open('https://www.canva.com/design/DAGfgAn1odw/7yQsbNfTNSFrqwvH-V3qjw/view', '_blank')} className="p-1 rounded-lg overflow-hidden border bg-white shadow-sm hover:scale-105 transition-transform"><img src="charmander.png" className="w-full" /></button>
+                        <button onClick={() => window.open('https://www.canva.com/design/DAGfglCnsxw/8any-jTaFqAn2qrcoVKl5g/view', '_blank')} className="p-1 rounded-lg overflow-hidden border bg-white shadow-sm hover:scale-105 transition-transform"><img src="bulbasaur.png" className="w-full" /></button>
+                        <button onClick={() => window.open('https://www.canva.com/design/DAGfgodsqO8/lvZ0uMGdXc-vZWw2Otb4Bw/view', '_blank')} className="p-1 rounded-lg overflow-hidden border bg-white shadow-sm hover:scale-105 transition-transform"><img src="squirtle.png" className="w-full" /></button>
                     </div>
                 )}},
-                { id: 5, title: 'JADUAL PENGGUNAAN BAJU', icon: 'shirt', color: 'text-cyan-600', bgColor: 'bg-cyan-100', popup: { title: 'Jadual Pemakaian Baju', content: (
-                    <div className="max-h-[60vh] overflow-y-auto">
-                        <img src="jadual pemakaian baju.jpg" className="w-full h-auto rounded-lg" alt="Jadual Baju" />
-                    </div>
-                ) }},
-                { id: 6, title: 'SURAT TIDAK HADIR', icon: 'mail', color: 'text-rose-600', bgColor: 'bg-rose-100', url: 'https://surattidakhadirmurid.sekolah-8943-cm1.workers.dev/' }
+                { id: 5, title: 'JADUAL PENGGUNAAN BAJU', icon: 'shirt', color: 'text-cyan-600', bgColor: 'bg-cyan-100', popup: { title: 'Jadual Pemakaian Baju', content: <img src="jadual pemakaian baju.jpg" className="w-full rounded-lg" /> }}
             ];
 
             return (
                 <div className="min-h-screen bg-slate-100 flex justify-center">
                     <div className="w-full max-w-md bg-white shadow-2xl flex flex-col h-screen overflow-hidden">
                         
-                        {/* Header Section */}
-                        <div className="bg-white p-4 border-b flex items-center gap-3 shrink-0">
-                            <img src="logo.png" className="h-10 w-10 object-cover rounded-full" alt="Logo" />
-                            <h1 className="font-bold text-gray-800 uppercase">PORTAL SKPK MIRI</h1>
+                        {/* Header dengan Analitik */}
+                        <div className="bg-white p-4 border-b flex items-center justify-between shrink-0">
+                            <div className="flex items-center gap-3">
+                                <img src="logo.png" className="h-10 w-10 object-cover rounded-full shadow-sm" />
+                                <h1 className="font-bold text-gray-800 text-[13px] sm:text-[15px] uppercase tracking-tight">PORTAL SKPK MIRI</h1>
+                            </div>
+                            <div className="flex flex-col items-end justify-center bg-slate-50 border px-2 py-1.5 rounded-lg">
+                                <div className="flex items-center gap-1.5 text-[10px] text-gray-600 font-medium">
+                                    <Icon name="user-check" size={12} className="text-blue-500" /> Hari ini: {stats.today}
+                                </div>
+                                <div className="flex items-center gap-1.5 text-[10px] text-gray-600 font-medium mt-0.5">
+                                    <Icon name="bar-chart-2" size={12} className="text-emerald-500" /> Total: {stats.total}
+                                </div>
+                            </div>
                         </div>
-                        
-                        {}
-                        {/* Scrollable Content */}
+
                         <div className="flex-1 overflow-y-auto p-4 hide-scrollbar">
                             <div className="flex flex-col gap-3">
+                                
                                 {menuItems.map(item => (
                                     <button key={item.id} onClick={() => item.popup ? (setModalContent(item.popup), setShowModal(true)) : window.open(item.url, '_blank')} className="w-full bg-white border p-4 rounded-2xl shadow-sm flex items-center gap-4 hover:bg-slate-50 transition-colors">
                                         <div className={`p-3 rounded-xl ${item.bgColor} ${item.color}`}><Icon name={item.icon} /></div>
@@ -97,9 +137,15 @@
                                         <Icon name="chevron-right" size={20} className="text-gray-300" />
                                     </button>
                                 ))}
-                                
-                                {}
-                                {/* Rekod Amalan Murid Menu */}
+
+                                {/* SURAT TIDAK HADIR */}
+                                <button onClick={() => window.open('https://surattidakhadirmurid.sekolah-8943-cm1.workers.dev/', '_blank')} className="w-full bg-white border p-4 rounded-2xl shadow-sm flex items-center gap-4 hover:bg-slate-50 transition-colors">
+                                    <div className="p-3 rounded-xl bg-red-100 text-red-600"><Icon name="mail-warning" /></div>
+                                    <h3 className="font-semibold text-gray-800 text-sm flex-1 text-left">Surat Tidak Hadir</h3>
+                                    <Icon name="chevron-right" size={20} className="text-gray-300" />
+                                </button>
+
+                                {/* REKOD AMALAN MURID */}
                                 <button onClick={() => setShowRekodMenu(!showRekodMenu)} className="w-full bg-white border p-4 rounded-2xl shadow-sm flex items-center gap-4 hover:bg-slate-50 transition-colors">
                                     <div className="p-3 rounded-xl bg-orange-100 text-orange-600"><Icon name="clipboard-list" /></div>
                                     <h3 className="font-semibold text-gray-800 text-sm flex-1 text-left">Rekod Amalan Murid</h3>
@@ -107,13 +153,12 @@
                                 </button>
                                 {showRekodMenu && (
                                     <div className="flex flex-col gap-2 pl-4">
-                                        <button onClick={() => alert('Sedang dikemaskini')} className="p-4 bg-slate-50 rounded-xl text-left text-sm font-medium text-green-700 hover:bg-green-50 transition-colors">✓ Rekod Amalan Baik</button>
-                                        <button onClick={() => alert('Sedang dikemaskini')} className="p-4 bg-slate-50 rounded-xl text-left text-sm font-medium text-red-700 hover:bg-red-50 transition-colors">⚠ Rekod Salah Laku</button>
+                                        <button onClick={() => alert('Sedang dikemaskini')} className="p-4 bg-slate-50 border rounded-xl text-left text-sm font-medium text-green-700 shadow-sm">✓ Rekod Amalan Baik</button>
+                                        <button onClick={() => alert('Sedang dikemaskini')} className="p-4 bg-slate-50 border rounded-xl text-left text-sm font-medium text-red-700 shadow-sm">⚠ Rekod Salah Laku</button>
                                     </div>
                                 )}
-                                
-                                {}
-                                {/* Media Sosial Menu */}
+
+                                {/* MEDIA SOSIAL */}
                                 <button onClick={() => setShowSocialMenu(!showSocialMenu)} className="w-full bg-white border p-4 rounded-2xl shadow-sm flex items-center gap-4 hover:bg-slate-50 transition-colors">
                                     <div className="p-3 rounded-xl bg-pink-100 text-pink-600"><Icon name="smartphone" /></div>
                                     <h3 className="font-semibold text-gray-800 text-sm flex-1 text-left">Media Sosial</h3>
@@ -121,14 +166,9 @@
                                 </button>
                                 {showSocialMenu && (
                                     <div className="grid grid-cols-2 gap-3">
-                                        {[ 
-                                            {name:'Laman Web', icon:'globe', link:'#'}, 
-                                            {name:'Facebook', image:'facebook.png', link:'#'}, 
-                                            {name:'TikTok', image:'tiktok.png', link:'#'}, 
-                                            {name:'YouTube', image:'youtube.png', link:'#'}
-                                        ].map((s,i) => (
-                                            <button key={i} className="bg-white border rounded-xl p-4 flex flex-col items-center justify-center gap-3 shadow-sm hover:shadow-md hover:bg-slate-50 transition-all">
-                                                {s.image ? <img src={s.image} className="w-8 h-8 object-contain" alt={s.name} /> : <Icon name={s.icon} size={28} className="text-gray-600" />}
+                                        {[ {name:'Facebook', img:'facebook.png', link:'#'}, {name:'TikTok', img:'tiktok.png', link:'#'}, {name:'YouTube', img:'youtube.png', link:'#'}].map((s,i) => (
+                                            <button key={i} className="bg-white border rounded-xl p-4 flex flex-col items-center justify-center gap-2 shadow-sm hover:scale-[1.02] transition-transform">
+                                                <img src={s.img} alt={s.name} className="w-10 h-10 object-contain" />
                                                 <span className="text-xs font-bold text-gray-700">{s.name}</span>
                                             </button>
                                         ))}
@@ -136,24 +176,17 @@
                                 )}
                             </div>
                         </div>
-                        
-                        {}
-                        {/* Universal Modal / Popup */}
+
+                        {/* Modals Popup */}
                         {showModal && (
-                            <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setShowModal(false)}>
-                                <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
-                                    <div className="flex justify-between items-center mb-4">
-                                        <h3 className="font-bold text-gray-800">{modalContent.title}</h3>
-                                        <button onClick={() => setShowModal(false)} className="bg-gray-100 p-2 rounded-full text-gray-500 hover:bg-gray-200 transition-colors">
-                                            <Icon name="x" size={18} />
-                                        </button>
-                                    </div>
+                            <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm" onClick={() => setShowModal(false)}>
+                                <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-xl" onClick={e => e.stopPropagation()}>
+                                    <h3 className="font-bold text-center text-gray-800 mb-4">{modalContent.title}</h3>
                                     {modalContent.content}
-                                    <button onClick={() => setShowModal(false)} className="w-full mt-6 bg-blue-600 text-white rounded-xl py-3 font-semibold hover:bg-blue-700 transition-colors">Tutup</button>
+                                    <button onClick={() => setShowModal(false)} className="w-full mt-6 bg-blue-600 hover:bg-blue-700 transition-colors text-white font-semibold rounded-xl py-3">Tutup</button>
                                 </div>
                             </div>
                         )}
-                        
                     </div>
                 </div>
             );
