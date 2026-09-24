@@ -104,13 +104,15 @@
                     </div>
                 )}},
                 { id: 5, title: 'JADUAL PENGGUNAAN BAJU', icon: 'shirt', color: 'text-cyan-600', bgColor: 'bg-cyan-100', popup: { title: 'Jadual Pemakaian Baju', content: (
-                    <div className="flex flex-col gap-3">
-                        <img src="jadual%20pemakaian%20baju.jpg" alt="Jadual Baju 1" className="w-full h-auto rounded-lg shadow-sm border" onError={(e) => e.target.src='https://placehold.co/600x400/eeeeee/999999?text=Gambar+Tidak+Dijumpai'} />
-                        <img src="jadualbajusukan.jpg" alt="Jadual Baju 2" className="w-full h-auto rounded-lg shadow-sm border" onError={(e) => e.target.src='https://placehold.co/600x400/eeeeee/999999?text=Gambar+Tidak+Dijumpai'} />
+                    <div className="grid grid-cols-2 gap-2">
+                        <img src="jadual%20pemakaian%20baju.jpg" alt="Jadual Baju 1" className="w-full h-auto object-contain rounded-lg shadow-sm border bg-gray-50" onError={(e) => e.target.src='https://placehold.co/600x400/eeeeee/999999?text=Tiada+Gambar'} />
+                        <img src="jadualbajusukan.jpg" alt="Jadual Baju 2" className="w-full h-auto object-contain rounded-lg shadow-sm border bg-gray-50" onError={(e) => e.target.src='https://placehold.co/600x400/eeeeee/999999?text=Tiada+Gambar'} />
                     </div>
                 )}},
                 { id: 6, title: 'JADUAL MINGGU SUKAN', icon: 'calendar-days', color: 'text-rose-600', bgColor: 'bg-rose-100', popup: { title: 'Jadual Minggu Sukan', content: (
-                    <img src="jadualsukan.jpg" alt="Jadual Minggu Sukan" className="w-full h-auto rounded-lg shadow-sm border" onError={(e) => e.target.src='https://placehold.co/600x400/eeeeee/999999?text=Gambar+Tidak+Dijumpai'} />
+                    <div className="flex flex-col w-full items-center justify-center">
+                        <img src="jadualsukan.jpg" alt="Jadual Minggu Sukan" className="w-full max-w-full h-auto object-contain rounded-lg shadow-sm border bg-gray-50" onError={(e) => e.target.src='https://placehold.co/600x400/eeeeee/999999?text=Gambar+Sukan+Tiada'} />
+                    </div>
                 )}}
             ];
 
@@ -186,7 +188,7 @@
                             <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm" onClick={() => setShowModal(false)}>
                                 <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-xl flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
                                     <h3 className="font-bold text-center text-gray-800 mb-4 shrink-0">{modalContent.title}</h3>
-                                    <div className="overflow-y-auto hide-scrollbar flex-1 flex flex-col gap-3">
+                                    <div className="overflow-y-auto hide-scrollbar flex-1 flex flex-col gap-3 items-center w-full">
                                         {modalContent.content}
                                     </div>
                                     <button onClick={() => setShowModal(false)} className="w-full mt-6 bg-blue-600 hover:bg-blue-700 transition-colors text-white font-semibold rounded-xl py-3 shrink-0">Tutup</button>
