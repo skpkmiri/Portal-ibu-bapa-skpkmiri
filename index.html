@@ -7,6 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>Portal SKPK Miri</title>
     
+    <!-- Ikon Pelbagai Saiz dan Manifest Inline untuk Android & iOS -->
     <link rel="icon" type="image/png" sizes="16x16" href="logo.png">
     <link rel="icon" type="image/png" sizes="32x32" href="logo.png">
     <link rel="icon" type="image/png" sizes="192x192" href="logo.png">
@@ -97,18 +98,20 @@
                 { id: 3, title: 'KELAB DAN PERSATUAN', icon: 'users', color: 'text-purple-600', bgColor: 'bg-purple-100', url: 'https://senaraiahlikelab.sekolah-8943-cm1.workers.dev/' },
                 { id: 4, title: 'RUMAH SUKAN', icon: 'medal', color: 'text-emerald-600', bgColor: 'bg-emerald-100', popup: { title: 'Pilih Rumah Sukan', content: (
                     <div className="grid grid-cols-3 gap-2">
-                        <button onClick={() => window.open('https://www.canva.com/design/DAGfgAn1odw/7yQsbNfTNSFrqwvH-V3qjw/view', '_blank')} className="p-1 rounded-lg overflow-hidden border bg-white shadow-sm hover:scale-105 transition-transform"><img src="charmander_2.png" className="w-full" /></button>
-                        <button onClick={() => window.open('https://www.canva.com/design/DAGfglCnsxw/8any-jTaFqAn2qrcoVKl5g/view', '_blank')} className="p-1 rounded-lg overflow-hidden border bg-white shadow-sm hover:scale-105 transition-transform"><img src="bulbasaur_2.png" className="w-full" /></button>
-                        <button onClick={() => window.open('https://www.canva.com/design/DAGfgodsqO8/lvZ0uMGdXc-vZWw2Otb4Bw/view', '_blank')} className="p-1 rounded-lg overflow-hidden border bg-white shadow-sm hover:scale-105 transition-transform"><img src="squirtle_2.png" className="w-full" /></button>
+                        <button onClick={() => window.open('https://www.canva.com/design/DAGfgAn1odw/7yQsbNfTNSFrqwvH-V3qjw/view', '_blank')} className="p-1 rounded-lg overflow-hidden border bg-white shadow-sm hover:scale-105 transition-transform"><img src="charmander_2.png" className="w-full" alt="Charmander" /></button>
+                        <button onClick={() => window.open('https://www.canva.com/design/DAGfglCnsxw/8any-jTaFqAn2qrcoVKl5g/view', '_blank')} className="p-1 rounded-lg overflow-hidden border bg-white shadow-sm hover:scale-105 transition-transform"><img src="bulbasaur_2.png" className="w-full" alt="Bulbasaur" /></button>
+                        <button onClick={() => window.open('https://www.canva.com/design/DAGfgodsqO8/lvZ0uMGdXc-vZWw2Otb4Bw/view', '_blank')} className="p-1 rounded-lg overflow-hidden border bg-white shadow-sm hover:scale-105 transition-transform"><img src="squirtle_2.png" className="w-full" alt="Squirtle" /></button>
                     </div>
                 )}},
                 { id: 5, title: 'JADUAL PENGGUNAAN BAJU', icon: 'shirt', color: 'text-cyan-600', bgColor: 'bg-cyan-100', popup: { title: 'Jadual Pemakaian Baju', content: (
-                    <div className="grid grid-cols-2 gap-2">
-                        <img src="jadual pemakaian baju.jpg" className="w-full rounded-lg shadow-sm" />
-                        <img src="jadualbajusukan.jpg" className="w-full rounded-lg shadow-sm" />
+                    <div className="flex flex-col gap-3">
+                        <img src="jadual%20pemakaian%20baju.jpg" alt="Jadual Baju 1" className="w-full h-auto rounded-lg shadow-sm border" onError={(e) => e.target.src='https://placehold.co/600x400/eeeeee/999999?text=Gambar+Tidak+Dijumpai'} />
+                        <img src="jadualbajusukan.jpg" alt="Jadual Baju 2" className="w-full h-auto rounded-lg shadow-sm border" onError={(e) => e.target.src='https://placehold.co/600x400/eeeeee/999999?text=Gambar+Tidak+Dijumpai'} />
                     </div>
                 )}},
-                { id: 6, title: 'JADUAL MINGGU SUKAN', icon: 'calendar-days', color: 'text-rose-600', bgColor: 'bg-rose-100', popup: { title: 'Jadual Minggu Sukan', content: <img src="jadualsukan.jpg" className="w-full rounded-lg shadow-sm" /> } }
+                { id: 6, title: 'JADUAL MINGGU SUKAN', icon: 'calendar-days', color: 'text-rose-600', bgColor: 'bg-rose-100', popup: { title: 'Jadual Minggu Sukan', content: (
+                    <img src="jadualsukan.jpg" alt="Jadual Minggu Sukan" className="w-full h-auto rounded-lg shadow-sm border" onError={(e) => e.target.src='https://placehold.co/600x400/eeeeee/999999?text=Gambar+Tidak+Dijumpai'} />
+                )}}
             ];
 
             return (
@@ -117,7 +120,7 @@
                         
                         <div className="bg-white p-4 border-b flex items-center justify-between shrink-0">
                             <div className="flex items-center gap-3">
-                                <img src="logo.png" className="h-10 w-10 object-cover rounded-full shadow-sm" />
+                                <img src="logo.png" className="h-10 w-10 object-cover rounded-full shadow-sm" alt="Logo" />
                                 <h1 className="font-bold text-gray-800 text-[13px] sm:text-[15px] uppercase tracking-tight">PORTAL SKPK MIRI</h1>
                             </div>
                             <div className="flex flex-col items-end justify-center bg-slate-50 border px-2 py-1.5 rounded-lg">
@@ -141,6 +144,7 @@
                                     </button>
                                 ))}
 
+                                {}
                                 <button onClick={() => window.open('https://surattidakhadirmurid.sekolah-8943-cm1.workers.dev/', '_blank')} className="w-full bg-white border p-4 rounded-2xl shadow-sm flex items-center gap-4 hover:bg-slate-50 transition-colors">
                                     <div className="p-3 rounded-xl bg-red-100 text-red-600"><Icon name="mail-warning" /></div>
                                     <h3 className="font-semibold text-gray-800 text-sm flex-1 text-left">Surat Tidak Hadir</h3>
@@ -177,11 +181,12 @@
                             </div>
                         </div>
 
+                        {}
                         {showModal && (
                             <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm" onClick={() => setShowModal(false)}>
                                 <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-xl flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
                                     <h3 className="font-bold text-center text-gray-800 mb-4 shrink-0">{modalContent.title}</h3>
-                                    <div className="overflow-y-auto hide-scrollbar flex-1">
+                                    <div className="overflow-y-auto hide-scrollbar flex-1 flex flex-col gap-3">
                                         {modalContent.content}
                                     </div>
                                     <button onClick={() => setShowModal(false)} className="w-full mt-6 bg-blue-600 hover:bg-blue-700 transition-colors text-white font-semibold rounded-xl py-3 shrink-0">Tutup</button>
