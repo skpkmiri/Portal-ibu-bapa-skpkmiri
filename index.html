@@ -21,6 +21,7 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     
@@ -98,23 +99,29 @@
         };
 
         const initialMenuItems = [
-            { id: '0', title: 'PIBG', icon: 'heart-handshake', color: 'text-indigo-600', bgColor: 'bg-indigo-100', url: 'https://skpkmiri.github.io/PIBG/', isStatic: false },
-            { id: '1', title: 'JADUAL WAKTU KELAS', icon: 'calendar-clock', color: 'text-blue-600', bgColor: 'bg-blue-100', url: 'https://drive.google.com/file/d/1bq3ErkslIPpue8GfuP9htQ6AgLoSrirw/view?usp=sharing', isStatic: false },
-            { id: '2', title: 'JADUAL PERJUMPAAN KOKURIKULUM', icon: 'trophy', color: 'text-amber-600', bgColor: 'bg-amber-100', url: 'https://jadualperjumpaankoko.sekolah-8943-cm1.workers.dev/', isStatic: false },
-            { id: '3', title: 'KELAB DAN PERSATUAN', icon: 'users', color: 'text-purple-600', bgColor: 'bg-purple-100', url: 'https://senaraiahlikelab.sekolah-8943-cm1.workers.dev/', isStatic: false },
-            { id: '4', title: 'RUMAH SUKAN', icon: 'medal', color: 'text-emerald-600', bgColor: 'bg-emerald-100', isStatic: true, popup: { title: 'Pilih Rumah Sukan', content: 'rumah-sukan' } },
-            { id: '5', title: 'JADUAL PENGGUNAAN BAJU', icon: 'shirt', color: 'text-cyan-600', bgColor: 'bg-cyan-100', isStatic: true, popup: { title: 'Jadual Pemakaian Baju', content: 'jadual-baju' } },
-            { id: '6', title: 'JADUAL MINGGU SUKAN', icon: 'calendar-days', color: 'text-rose-600', bgColor: 'bg-rose-100', isStatic: true, popup: { title: 'Jadual Minggu Sukan', content: 'minggu-sukan' } }
+            { id: '0', title: 'PIBG', icon: 'heart-handshake', color: 'text-indigo-600', bgColor: 'bg-indigo-100', actionType: 'link', url: 'https://skpkmiri.github.io/PIBG/' },
+            { id: '1', title: 'JADUAL WAKTU KELAS', icon: 'calendar-clock', color: 'text-blue-600', bgColor: 'bg-blue-100', actionType: 'link', url: 'https://drive.google.com/file/d/1bq3ErkslIPpue8GfuP9htQ6AgLoSrirw/view?usp=sharing' },
+            { id: '2', title: 'JADUAL PERJUMPAAN KOKURIKULUM', icon: 'trophy', color: 'text-amber-600', bgColor: 'bg-amber-100', actionType: 'link', url: 'https://jadualperjumpaankoko.sekolah-8943-cm1.workers.dev/' },
+            { id: '3', title: 'KELAB DAN PERSATUAN', icon: 'users', color: 'text-purple-600', bgColor: 'bg-purple-100', actionType: 'link', url: 'https://senaraiahlikelab.sekolah-8943-cm1.workers.dev/' },
+            { id: '4', title: 'RUMAH SUKAN', icon: 'medal', color: 'text-emerald-600', bgColor: 'bg-emerald-100', actionType: 'popup-custom', popupContentId: 'rumah-sukan', popupTitle: 'Pilih Rumah Sukan' },
+            { id: '5', title: 'JADUAL PENGGUNAAN BAJU', icon: 'shirt', color: 'text-cyan-600', bgColor: 'bg-cyan-100', actionType: 'popup-custom', popupContentId: 'jadual-baju', popupTitle: 'Jadual Pemakaian Baju' },
+            { id: '6', title: 'JADUAL MINGGU SUKAN', icon: 'calendar-days', color: 'text-rose-600', bgColor: 'bg-rose-100', actionType: 'popup-custom', popupContentId: 'minggu-sukan', popupTitle: 'Jadual Minggu Sukan' },
+            { id: '7', title: 'SURAT TIDAK HADIR', icon: 'mail-warning', color: 'text-red-600', bgColor: 'bg-red-100', actionType: 'link', url: 'https://surattidakhadirmurid.sekolah-8943-cm1.workers.dev/' },
+            { id: '8', title: 'REKOD AMALAN MURID', icon: 'clipboard-list', color: 'text-orange-600', bgColor: 'bg-orange-100', actionType: 'dropdown-rekod' },
+            { id: '9', title: 'MEDIA SOSIAL', icon: 'smartphone', color: 'text-pink-600', bgColor: 'bg-pink-100', actionType: 'dropdown-sosial' }
         ];
 
         const App = () => {
             const [showModal, setShowModal] = React.useState(false);
             const [modalContent, setModalContent] = React.useState({ title: '', content: null });
+            
+            // Dropdown states
             const [showSocialMenu, setShowSocialMenu] = React.useState(false);
             const [showRekodMenu, setShowRekodMenu] = React.useState(false);
             
             const [stats, setStats] = React.useState({ total: 0, today: 0 });
             const hasCounted = React.useRef(false);
+            const hasShownAnnouncementRef = React.useRef(false);
             
             // Admin states
             const [isAdminMode, setIsAdminMode] = React.useState(false);
@@ -123,16 +130,16 @@
             const [showAdminLogin, setShowAdminLogin] = React.useState(false);
             const [loginError, setLoginError] = React.useState('');
             
-            // Dynamic Data states (Simulated fetch from DB, falling back to initial)
+            // Dynamic Data states
             const [menuItems, setMenuItems] = React.useState(initialMenuItems);
-            const [announcement, setAnnouncement] = React.useState({ active: false, text: "Selamat datang ke Portal SKPK Miri", showOnLoad: false });
-            const [hasShownAnnouncement, setHasShownAnnouncement] = React.useState(false);
+            const [announcement, setAnnouncement] = React.useState({ active: false, text: "Selamat datang ke Portal SKPK Miri", showOnLoad: false, imageUrl: null });
 
             // Admin edit states
             const [editingMenuId, setEditingMenuId] = React.useState(null);
-            const [editMenuForm, setEditMenuForm] = React.useState({ title: '', url: '', icon: '' });
+            const [editMenuForm, setEditMenuForm] = React.useState({ title: '', url: '', icon: '', actionType: 'link' });
             const [isAddingNew, setIsAddingNew] = React.useState(false);
             const [formError, setFormError] = React.useState('');
+            const [isUploading, setIsUploading] = React.useState(false);
 
             React.useEffect(() => {
                 const todayStr = new Date().toISOString().split('T')[0];
@@ -149,41 +156,88 @@
                 const unsubscribe = statsRef.onSnapshot(doc => {
                     if (doc.exists) {
                         const data = doc.data();
-                        setStats({
-                            total: data.total || 0,
-                            today: data[todayStr] || 0
-                        });
+                        setStats({ total: data.total || 0, today: data[todayStr] || 0 });
                     }
                 });
                 
-                // Simulate loading data from LocalStorage for persistence in this demo
-                // In a real app, this would come from Firestore
-                const savedMenus = localStorage.getItem('skpk_menus');
-                if (savedMenus) setMenuItems(JSON.parse(savedMenus));
-                
-                const savedAnnouncement = localStorage.getItem('skpk_announcement');
-                if (savedAnnouncement) {
-                    const parsedAnnouncement = JSON.parse(savedAnnouncement);
-                    setAnnouncement(parsedAnnouncement);
-                    if (parsedAnnouncement.active && parsedAnnouncement.showOnLoad && !hasShownAnnouncement) {
-                        setModalContent({ 
-                            title: '📢 PENGUMUMAN / NOTIS', 
-                            content: <div className="p-4 text-center text-lg">{parsedAnnouncement.text}</div> 
-                        });
-                        setShowModal(true);
-                        setHasShownAnnouncement(true);
-                    }
-                }
+                const configRef = db.collection('portal_data').doc('config');
+                const unsubConfig = configRef.onSnapshot(doc => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        
+                        // Parse & Merge Menu (Memastikan struktur baru selari dengan lama)
+                        if (data.menus) {
+                            const formattedMenus = data.menus.map(m => {
+                                if (!m.actionType) {
+                                    if (m.isStatic) {
+                                       if (m.popup && m.popup.content === 'rumah-sukan') return {...m, actionType: 'popup-custom', popupContentId: 'rumah-sukan', popupTitle: m.popup.title};
+                                       if (m.popup && m.popup.content === 'jadual-baju') return {...m, actionType: 'popup-custom', popupContentId: 'jadual-baju', popupTitle: m.popup.title};
+                                       if (m.popup && m.popup.content === 'minggu-sukan') return {...m, actionType: 'popup-custom', popupContentId: 'minggu-sukan', popupTitle: m.popup.title};
+                                    }
+                                    return {...m, actionType: 'link'};
+                                }
+                                return m;
+                            });
+                            
+                            // Tambah menu terbina dalam jika ia dipadam pada versi lama
+                            const systemIds = ['7', '8', '9'];
+                            systemIds.forEach(id => {
+                                if (!formattedMenus.find(f => f.id === id)) {
+                                    const found = initialMenuItems.find(i => i.id === id);
+                                    if (found) formattedMenus.push(found);
+                                }
+                            });
+                            setMenuItems(formattedMenus);
+                        }
 
-                return () => unsubscribe();
-            }, [hasShownAnnouncement]);
+                        // Set Announcement
+                        if (data.announcement) {
+                            setAnnouncement(data.announcement);
+                            
+                            // Tunjuk pop-up pengumuman kali pertama dibuka
+                            if (data.announcement.active && data.announcement.showOnLoad && !hasShownAnnouncementRef.current) {
+                                setModalContent({ 
+                                    title: '📢 PENGUMUMAN / NOTIS', 
+                                    content: (
+                                        <div className="flex flex-col gap-4 items-center w-full">
+                                            {data.announcement.imageUrl && (
+                                                <img src={data.announcement.imageUrl} alt="Pengumuman" className="w-full rounded-lg shadow-sm object-contain max-h-[50vh]" />
+                                            )}
+                                            {data.announcement.text && (
+                                                <div className="p-2 text-center text-md font-medium text-gray-800">
+                                                    {data.announcement.text}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )
+                                });
+                                setShowModal(true);
+                                hasShownAnnouncementRef.current = true;
+                            }
+                        }
+                    } else {
+                        // Cipta fail konfigurasi awal jika tiada
+                        configRef.set({
+                            menus: initialMenuItems,
+                            announcement: { active: false, text: "Selamat datang ke Portal SKPK Miri", showOnLoad: false, imageUrl: null }
+                        });
+                    }
+                }, (error) => {
+                    console.error("Gagal mendapatkan data: ", error);
+                });
+
+                return () => {
+                    unsubscribe();
+                    unsubConfig();
+                };
+            }, []);
 
             const handleAdminLogin = (e) => {
                 e.preventDefault();
                 setLoginError('');
                 if (adminPassword === 'skpkyba4112') {
                     setIsAdminMode(true);
-                    setShowAdminDashboard(true); // Terus buka dashboard
+                    setShowAdminDashboard(true);
                     setShowAdminLogin(false);
                     setAdminPassword('');
                 } else {
@@ -193,7 +247,49 @@
 
             const saveMenus = (newMenus) => {
                 setMenuItems(newMenus);
-                localStorage.setItem('skpk_menus', JSON.stringify(newMenus));
+                db.collection('portal_data').doc('config').set({ menus: newMenus }, { merge: true })
+                    .catch(err => console.error("Ralat menyimpan menu:", err));
+            };
+
+            const saveAnnouncement = (newAnnouncement) => {
+                setAnnouncement(newAnnouncement);
+                db.collection('portal_data').doc('config').set({ announcement: newAnnouncement }, { merge: true })
+                    .catch(err => console.error("Ralat menyimpan notis:", err));
+            };
+
+            const handleImageUpload = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                setIsUploading(true);
+
+                // Mampat dan tukar imej ke Base64 menggunakan Canvas
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        const MAX_WIDTH = 800;
+
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6); // Kualiti 60%
+                        saveAnnouncement({...announcement, imageUrl: compressedDataUrl});
+                        setIsUploading(false);
+                    };
+                };
             };
 
             const handleUpdateMenu = () => {
@@ -223,7 +319,7 @@
                         title: editMenuForm.title.toUpperCase(),
                         url: editMenuForm.url || '#',
                         icon: editMenuForm.icon || 'link',
-                        isStatic: false,
+                        actionType: 'link',
                         ...randomColor
                     };
                     updatedMenus = [...menuItems, newItem];
@@ -233,7 +329,7 @@
                             return { 
                                 ...item, 
                                 title: editMenuForm.title.toUpperCase(),
-                                url: editMenuForm.url || item.url,
+                                url: editMenuForm.actionType === 'link' ? (editMenuForm.url || item.url) : item.url,
                                 icon: editMenuForm.icon || item.icon
                             };
                         }
@@ -244,7 +340,7 @@
                 saveMenus(updatedMenus);
                 setEditingMenuId(null);
                 setIsAddingNew(false);
-                setEditMenuForm({ title: '', url: '', icon: '' });
+                setEditMenuForm({ title: '', url: '', icon: '', actionType: 'link' });
             };
 
             const confirmDeleteMenu = (id) => {
@@ -270,11 +366,6 @@
                 });
                 setShowModal(true);
             }
-
-            const saveAnnouncement = (newAnnouncement) => {
-                setAnnouncement(newAnnouncement);
-                localStorage.setItem('skpk_announcement', JSON.stringify(newAnnouncement));
-            };
 
             const getPopupContent = (type) => {
                 switch(type) {
@@ -307,7 +398,7 @@
                 <div className="min-h-screen bg-slate-100 flex justify-center">
                     <div className="w-full max-w-md bg-white shadow-2xl flex flex-col h-screen overflow-hidden relative">
                         
-                        {/* Header Section */}
+                        {/* Bahagian Atas (Header) */}
                         <div className="bg-white p-4 border-b flex items-center justify-between shrink-0">
                             <div className="flex items-center gap-3">
                                 <button 
@@ -331,7 +422,7 @@
                             </div>
                         </div>
 
-                        {/* Announcement Banner */}
+                        {/* Banner Pengumuman Teks Di Bawah Header */}
                         {announcement.active && announcement.text && (
                             <div className="bg-amber-100/80 border-b border-amber-200 p-2 shrink-0 flex items-center justify-center gap-2">
                                 <Icon name="bell" size={14} className="text-amber-700 animate-pulse" />
@@ -341,9 +432,9 @@
 
                         <div className="flex-1 overflow-y-auto p-4 hide-scrollbar bg-slate-50">
                             
-                            {/* Toggle View: Admin Dashboard vs Portal View */}
+                            {/* Paparan Alternatif: Mod Dashboard Admin ATAU Paparan Portal Biasa */}
                             {isAdminMode && showAdminDashboard ? (
-                                /* ADMIN INLINE DASHBOARD */
+                                /* PAPARAN PENGURUSAN ADMIN */
                                 <div className="flex flex-col gap-4">
                                     <div className="flex items-center gap-2 mb-2">
                                         <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
@@ -355,18 +446,18 @@
                                         </div>
                                     </div>
                                     
-                                    {/* Admin: Notis Section */}
+                                    {/* Admin: Tetapan Pengumuman */}
                                     <div className="bg-white p-4 rounded-2xl border shadow-sm">
                                         <h4 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
                                             <Icon name="bell-ring" size={16} className="text-amber-500" /> Pengumuman & Notis
                                         </h4>
                                         <div className="space-y-3">
                                             <div className="flex items-center justify-between bg-slate-50 p-2 rounded-lg border">
-                                                <label className="text-xs font-semibold text-gray-700 flex-1">Aktifkan Notis (Bawah Logo)?</label>
+                                                <label className="text-xs font-semibold text-gray-700 flex-1">Aktifkan Notis Teks Bawah Logo?</label>
                                                 <input type="checkbox" checked={announcement.active} onChange={(e) => saveAnnouncement({...announcement, active: e.target.checked})} className="w-4 h-4 text-blue-600 rounded border-gray-300" />
                                             </div>
                                             <div className="flex items-center justify-between bg-slate-50 p-2 rounded-lg border">
-                                                <label className="text-xs font-semibold text-gray-700 flex-1">Pop-up Semasa Buka Portal?</label>
+                                                <label className="text-xs font-semibold text-gray-700 flex-1">Pop-up Gambar/Teks Semasa Buka Portal?</label>
                                                 <input type="checkbox" checked={announcement.showOnLoad} onChange={(e) => saveAnnouncement({...announcement, showOnLoad: e.target.checked})} className="w-4 h-4 text-blue-600 rounded border-gray-300" />
                                             </div>
                                             <textarea 
@@ -376,17 +467,39 @@
                                                 className="w-full p-3 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" 
                                                 rows="3"
                                             />
+                                            
+                                            {/* Muat Naik Gambar Pop-up Sahaja */}
+                                            <div className="bg-slate-50 p-3 rounded-xl border">
+                                                <label className="text-xs font-semibold text-gray-700 block mb-2">Gambar Pengumuman (Tampil Di Pop-up Sahaja)</label>
+                                                
+                                                {announcement.imageUrl && (
+                                                    <div className="relative mb-3 inline-block">
+                                                        <img src={announcement.imageUrl} alt="Preview" className="h-28 w-auto object-cover rounded-lg border shadow-sm" />
+                                                        <button onClick={() => saveAnnouncement({...announcement, imageUrl: null})} className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full shadow hover:bg-red-600"><Icon name="x" size={12}/></button>
+                                                    </div>
+                                                )}
+                                                
+                                                <input 
+                                                    type="file" 
+                                                    accept="image/*"
+                                                    onChange={handleImageUpload}
+                                                    disabled={isUploading}
+                                                    className="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+                                                />
+                                                {isUploading && <p className="text-[10px] text-blue-500 font-medium mt-1 animate-pulse">Sedang memproses gambar...</p>}
+                                                <p className="text-[10px] text-gray-400 mt-1">Sila pilih fail imej berukuran kecil (Sistem akan memampatkan imej).</p>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    {/* Admin: Menu Section */}
+                                    {/* Admin: Senarai Keseluruhan Menu */}
                                     <div className="bg-white p-4 rounded-2xl border shadow-sm">
                                         <div className="flex items-center justify-between mb-4">
                                             <h4 className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                                                <Icon name="list" size={16} className="text-blue-500" /> Pautan Menu
+                                                <Icon name="list" size={16} className="text-blue-500" /> Senarai Pautan
                                             </h4>
                                             <button 
-                                                onClick={() => { setIsAddingNew(true); setEditingMenuId(null); setEditMenuForm({ title: '', url: '', icon: 'link' }); setFormError(''); }} 
+                                                onClick={() => { setIsAddingNew(true); setEditingMenuId(null); setEditMenuForm({ title: '', url: '', icon: 'link', actionType: 'link' }); setFormError(''); }} 
                                                 className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 font-semibold shadow-sm transition-colors flex items-center gap-1"
                                             >
                                                 <Icon name="plus" size={14} /> Tambah
@@ -400,86 +513,81 @@
                                                             <div className={`p-1.5 rounded-md ${item.bgColor} ${item.color} shrink-0`}><Icon name={item.icon} size={14} /></div>
                                                             <span className="text-xs font-bold text-gray-800 truncate">{item.title}</span>
                                                         </div>
-                                                        {!item.isStatic ? (
-                                                            <div className="flex gap-1.5 shrink-0 ml-2">
-                                                                <button onClick={() => { setEditingMenuId(item.id); setIsAddingNew(false); setEditMenuForm({ title: item.title, url: item.url, icon: item.icon }); setFormError(''); }} className="p-1.5 text-blue-600 bg-white border shadow-sm hover:bg-blue-50 rounded-lg"><Icon name="edit-2" size={14} /></button>
-                                                                <button onClick={() => confirmDeleteMenu(item.id)} className="p-1.5 text-red-600 bg-white border shadow-sm hover:bg-red-50 rounded-lg"><Icon name="trash-2" size={14} /></button>
-                                                            </div>
-                                                        ) : (
-                                                            <span className="text-[10px] bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full font-medium ml-2">Statik</span>
-                                                        )}
+                                                        <div className="flex gap-1.5 shrink-0 ml-2">
+                                                            <button onClick={() => { setEditingMenuId(item.id); setIsAddingNew(false); setEditMenuForm({ title: item.title, url: item.url || '', icon: item.icon, actionType: item.actionType }); setFormError(''); }} className="p-1.5 text-blue-600 bg-white border shadow-sm hover:bg-blue-50 rounded-lg"><Icon name="edit-2" size={14} /></button>
+                                                            <button onClick={() => confirmDeleteMenu(item.id)} className="p-1.5 text-red-600 bg-white border shadow-sm hover:bg-red-50 rounded-lg"><Icon name="trash-2" size={14} /></button>
+                                                        </div>
                                                     </div>
-                                                    {!item.isStatic && <span className="text-[10px] text-gray-500 truncate">{item.url}</span>}
+                                                    {item.actionType === 'link' ? (
+                                                        <span className="text-[10px] text-gray-500 truncate">{item.url}</span>
+                                                    ) : (
+                                                        <span className="text-[10px] bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full font-medium w-max">Sistem / Terbina Dalam</span>
+                                                    )}
                                                 </div>
                                             ))}
                                         </div>
                                     </div>
-                                    
-                                    {/* Bottom Spacer for Admin Dashboard */}
                                     <div className="h-4"></div>
                                 </div>
                             ) : (
-                                /* PORTAL NORMAL VIEW */
+                                /* PAPARAN PORTAL BIASA UNTUK PENGGUNA */
                                 <div className="flex flex-col gap-3">
-                                    
-                                    {/* Dynamic and Static Menu Items */}
-                                    {menuItems.map(item => (
-                                        <button 
-                                            key={item.id} 
-                                            onClick={() => {
-                                                if (item.popup) {
-                                                    setModalContent({ title: item.popup.title, content: getPopupContent(item.popup.content) });
-                                                    setShowModal(true);
-                                                } else {
-                                                    window.open(item.url, '_blank');
-                                                }
-                                            }} 
-                                            className="w-full bg-white border p-4 rounded-2xl shadow-sm flex items-center gap-4 hover:bg-slate-50 transition-colors"
-                                        >
-                                            <div className={`p-3 rounded-xl ${item.bgColor} ${item.color}`}><Icon name={item.icon} /></div>
-                                            <h3 className="font-semibold text-gray-800 text-sm flex-1 text-left">{item.title}</h3>
-                                            <Icon name="chevron-right" size={20} className="text-gray-300" />
-                                        </button>
-                                    ))}
+                                    {menuItems.map(item => {
+                                        const isDropdownRekod = item.actionType === 'dropdown-rekod';
+                                        const isDropdownSosial = item.actionType === 'dropdown-sosial';
+                                        const isDropdown = isDropdownRekod || isDropdownSosial;
+                                        const isOpen = isDropdownRekod ? showRekodMenu : (isDropdownSosial ? showSocialMenu : false);
+                                        
+                                        const toggleMenu = () => {
+                                            if (isDropdownRekod) setShowRekodMenu(!showRekodMenu);
+                                            if (isDropdownSosial) setShowSocialMenu(!showSocialMenu);
+                                        };
 
-                                    {/* Fixed Bottom Menus */}
-                                    <button onClick={() => window.open('https://surattidakhadirmurid.sekolah-8943-cm1.workers.dev/', '_blank')} className="w-full bg-white border p-4 rounded-2xl shadow-sm flex items-center gap-4 hover:bg-slate-50 transition-colors">
-                                        <div className="p-3 rounded-xl bg-red-100 text-red-600"><Icon name="mail-warning" /></div>
-                                        <h3 className="font-semibold text-gray-800 text-sm flex-1 text-left">Surat Tidak Hadir</h3>
-                                        <Icon name="chevron-right" size={20} className="text-gray-300" />
-                                    </button>
-
-                                    <button onClick={() => setShowRekodMenu(!showRekodMenu)} className="w-full bg-white border p-4 rounded-2xl shadow-sm flex items-center gap-4 hover:bg-slate-50 transition-colors">
-                                        <div className="p-3 rounded-xl bg-orange-100 text-orange-600"><Icon name="clipboard-list" /></div>
-                                        <h3 className="font-semibold text-gray-800 text-sm flex-1 text-left">Rekod Amalan Murid</h3>
-                                        <Icon name={showRekodMenu ? "chevron-up" : "chevron-down"} size={20} className="text-gray-400" />
-                                    </button>
-                                    {showRekodMenu && (
-                                        <div className="flex flex-col gap-2 pl-4">
-                                            <button onClick={() => showInfoMessage('Sistem Rekod Amalan Baik sedang dikemaskini.')} className="p-4 bg-white border rounded-xl text-left text-sm font-medium text-green-700 shadow-sm hover:bg-green-50">✓ Rekod Amalan Baik</button>
-                                            <button onClick={() => showInfoMessage('Sistem Rekod Salah Laku sedang dikemaskini.')} className="p-4 bg-white border rounded-xl text-left text-sm font-medium text-red-700 shadow-sm hover:bg-red-50">⚠ Rekod Salah Laku</button>
-                                        </div>
-                                    )}
-
-                                    <button onClick={() => setShowSocialMenu(!showSocialMenu)} className="w-full bg-white border p-4 rounded-2xl shadow-sm flex items-center gap-4 hover:bg-slate-50 transition-colors">
-                                        <div className="p-3 rounded-xl bg-pink-100 text-pink-600"><Icon name="smartphone" /></div>
-                                        <h3 className="font-semibold text-gray-800 text-sm flex-1 text-left">Media Sosial</h3>
-                                        <Icon name={showSocialMenu ? "chevron-up" : "chevron-down"} size={20} className="text-gray-400" />
-                                    </button>
-                                    {showSocialMenu && (
-                                        <div className="grid grid-cols-2 gap-3 pb-4">
-                                            {[ {name:'Facebook', img:'facebook.png', link:'#'}, {name:'TikTok', img:'tiktok.png', link:'#'}, {name:'YouTube', img:'youtube.png', link:'#'}].map((s,i) => (
-                                                <button key={i} onClick={() => showInfoMessage(`Pautan ${s.name} sedang dikemaskini.`)} className="bg-white border rounded-xl p-4 flex flex-col items-center justify-center gap-2 shadow-sm hover:scale-[1.02] transition-transform">
-                                                    <img src={s.img} alt={s.name} className="w-10 h-10 object-contain" onError={(e)=>e.target.src=`https://placehold.co/40x40/e2e8f0/64748b?text=${s.name.charAt(0)}`} />
-                                                    <span className="text-xs font-bold text-gray-700">{s.name}</span>
+                                        return (
+                                            <React.Fragment key={item.id}>
+                                                <button 
+                                                    onClick={() => {
+                                                        if (item.actionType === 'link') window.open(item.url, '_blank');
+                                                        else if (item.actionType === 'popup-custom') {
+                                                            setModalContent({ title: item.popupTitle || item.title, content: getPopupContent(item.popupContentId) });
+                                                            setShowModal(true);
+                                                        }
+                                                        else if (isDropdown) toggleMenu();
+                                                    }} 
+                                                    className="w-full bg-white border p-4 rounded-2xl shadow-sm flex items-center gap-4 hover:bg-slate-50 transition-colors"
+                                                >
+                                                    <div className={`p-3 rounded-xl ${item.bgColor} ${item.color}`}><Icon name={item.icon} /></div>
+                                                    <h3 className="font-semibold text-gray-800 text-sm flex-1 text-left">{item.title}</h3>
+                                                    <Icon name={isDropdown ? (isOpen ? "chevron-up" : "chevron-down") : "chevron-right"} size={20} className={isDropdown ? "text-gray-400" : "text-gray-300"} />
                                                 </button>
-                                            ))}
-                                        </div>
-                                    )}
+
+                                                {/* Komponen Bawah Khas: Rekod Amalan */}
+                                                {isDropdownRekod && showRekodMenu && (
+                                                    <div className="flex flex-col gap-2 pl-4">
+                                                        <button onClick={() => showInfoMessage('Sistem Rekod Amalan Baik sedang dikemaskini.')} className="p-4 bg-white border rounded-xl text-left text-sm font-medium text-green-700 shadow-sm hover:bg-green-50 transition-colors">✓ Rekod Amalan Baik</button>
+                                                        <button onClick={() => showInfoMessage('Sistem Rekod Salah Laku sedang dikemaskini.')} className="p-4 bg-white border rounded-xl text-left text-sm font-medium text-red-700 shadow-sm hover:bg-red-50 transition-colors">⚠ Rekod Salah Laku</button>
+                                                    </div>
+                                                )}
+
+                                                {/* Komponen Bawah Khas: Media Sosial */}
+                                                {isDropdownSosial && showSocialMenu && (
+                                                    <div className="grid grid-cols-2 gap-3 pb-4 pt-1">
+                                                        {[ {name:'Facebook', img:'facebook.png', link:'#'}, {name:'TikTok', img:'tiktok.png', link:'#'}, {name:'YouTube', img:'youtube.png', link:'#'}].map((s,i) => (
+                                                            <button key={i} onClick={() => showInfoMessage(`Pautan ${s.name} sedang dikemaskini.`)} className="bg-white border rounded-xl p-4 flex flex-col items-center justify-center gap-2 shadow-sm hover:scale-[1.02] transition-transform">
+                                                                <img src={s.img} alt={s.name} className="w-10 h-10 object-contain" onError={(e)=>e.target.src=`https://placehold.co/40x40/e2e8f0/64748b?text=${s.name.charAt(0)}`} />
+                                                                <span className="text-xs font-bold text-gray-700">{s.name}</span>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </React.Fragment>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
 
+                        {/* Bar Navigasi Bawah Untuk Admin Apabila Log Masuk */}
                         {isAdminMode && (
                             <div className="bg-slate-800 text-white p-3 shrink-0 flex items-center justify-between rounded-t-xl shadow-lg mt-auto z-10 relative">
                                 <div className="flex items-center gap-2">
@@ -497,8 +605,7 @@
                             </div>
                         )}
 
-                        
-                        {/* Admin Login Modal */}
+                        {/* Modal Log Masuk Admin */}
                         {showAdminLogin && (
                             <div className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm" onClick={() => setShowAdminLogin(false)}>
                                 <form onSubmit={handleAdminLogin} className="bg-white rounded-3xl p-6 w-full max-w-xs shadow-xl flex flex-col" onClick={e => e.stopPropagation()}>
@@ -526,7 +633,7 @@
                             </div>
                         )}
 
-                        {/* Add/Edit Menu Modal */}
+                        {/* Modal Tambah/Kemaskini Menu */}
                         {(editingMenuId || isAddingNew) && (
                             <div className="fixed inset-0 z-[70] bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm" onClick={() => { setEditingMenuId(null); setIsAddingNew(false); }}>
                                 <div className="bg-white rounded-3xl p-6 w-full max-w-xs shadow-xl flex flex-col" onClick={e => e.stopPropagation()}>
@@ -536,13 +643,21 @@
                                     
                                     <div className="space-y-4">
                                         <div>
-                                            <label className="text-xs font-bold text-gray-700 mb-1.5 block">Tajuk Pautan <span className="text-red-500">*</span></label>
+                                            <label className="text-xs font-bold text-gray-700 mb-1.5 block">Tajuk Butang Menu <span className="text-red-500">*</span></label>
                                             <input type="text" value={editMenuForm.title} onChange={e=>setEditMenuForm({...editMenuForm, title: e.target.value})} className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Contoh: BUKU TEKS DIGITAL" />
                                         </div>
-                                        <div>
-                                            <label className="text-xs font-bold text-gray-700 mb-1.5 block">Pautan Penuh (URL)</label>
-                                            <input type="url" value={editMenuForm.url} onChange={e=>setEditMenuForm({...editMenuForm, url: e.target.value})} className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="https://..." />
-                                        </div>
+                                        
+                                        {editMenuForm.actionType === 'link' || isAddingNew ? (
+                                            <div>
+                                                <label className="text-xs font-bold text-gray-700 mb-1.5 block">Pautan Penuh (URL)</label>
+                                                <input type="url" value={editMenuForm.url} onChange={e=>setEditMenuForm({...editMenuForm, url: e.target.value})} className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="https://..." />
+                                            </div>
+                                        ) : (
+                                            <div className="bg-amber-50 p-3 rounded-lg border border-amber-200">
+                                                <p className="text-xs text-amber-700 font-medium flex items-center gap-1.5"><Icon name="info" size={14}/> Pautan ini adalah komponen sistem terbina dalam. URL tidak boleh ditukar.</p>
+                                            </div>
+                                        )}
+                                        
                                         <div>
                                             <label className="text-xs font-bold text-gray-700 mb-1.5 block flex justify-between">
                                                 <span>Nama Ikon</span>
@@ -564,7 +679,7 @@
                             </div>
                         )}
 
-                        {/* General Display Modal (Popup Content & Info Messages) */}
+                        {/* Modal Paparan Info Umum & Notis */}
                         {showModal && (
                             <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm" onClick={() => setShowModal(false)}>
                                 <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-xl flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
