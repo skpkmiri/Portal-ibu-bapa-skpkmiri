@@ -7,7 +7,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>Portal SKPK Miri</title>
     
-    <!-- Ikon Pelbagai Saiz dan Manifest Inline untuk Android & iOS -->
     <link rel="icon" type="image/png" sizes="16x16" href="logo.png">
     <link rel="icon" type="image/png" sizes="32x32" href="logo.png">
     <link rel="icon" type="image/png" sizes="192x192" href="logo.png">
@@ -21,7 +20,6 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     
@@ -29,6 +27,23 @@
         body { margin: 0; padding: 0; background-color: #f1f5f9; font-family: 'Inter', sans-serif; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Animasi Marquee Bergerak untuk Banner Pengumuman */
+        .marquee-container {
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+            width: 100%;
+        }
+        .marquee-content {
+            display: inline-block;
+            animation: marquee 20s linear infinite;
+            padding-left: 100%; /* Mula di luar skrin kanan */
+        }
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); /* Bergerak ke luar skrin kiri */ }
+        }
     </style>
 </head>
 <body>
@@ -132,7 +147,7 @@
             
             // Dynamic Data states
             const [menuItems, setMenuItems] = React.useState(initialMenuItems);
-            const [announcement, setAnnouncement] = React.useState({ active: false, text: "Selamat datang ke Portal SKPK Miri", showOnLoad: false, imageUrl: null });
+            const [announcement, setAnnouncement] = React.useState({ active: false, text: "Selamat datang ke Portal SKPK Miri", showOnLoad: false, imageUrl: null, popupMode: 'both' });
 
             // Admin edit states
             const [editingMenuId, setEditingMenuId] = React.useState(null);
@@ -165,7 +180,7 @@
                     if (doc.exists) {
                         const data = doc.data();
                         
-                        // Parse & Merge Menu (Memastikan struktur baru selari dengan lama)
+                        // Parse & Merge Menu
                         if (data.menus) {
                             const formattedMenus = data.menus.map(m => {
                                 if (!m.actionType) {
@@ -179,7 +194,6 @@
                                 return m;
                             });
                             
-                            // Tambah menu terbina dalam jika ia dipadam pada versi lama
                             const systemIds = ['7', '8', '9'];
                             systemIds.forEach(id => {
                                 if (!formattedMenus.find(f => f.id === id)) {
@@ -190,20 +204,21 @@
                             setMenuItems(formattedMenus);
                         }
 
-                        // Set Announcement
+                        // Set Announcement and manage logic for displaying based on Mode
                         if (data.announcement) {
                             setAnnouncement(data.announcement);
                             
-                            // Tunjuk pop-up pengumuman kali pertama dibuka
                             if (data.announcement.active && data.announcement.showOnLoad && !hasShownAnnouncementRef.current) {
+                                const mode = data.announcement.popupMode || 'both'; // Default kepada both jika tiada data
+                                
                                 setModalContent({ 
                                     title: '📢 PENGUMUMAN / NOTIS', 
                                     content: (
                                         <div className="flex flex-col gap-4 items-center w-full">
-                                            {data.announcement.imageUrl && (
+                                            {(mode === 'both' || mode === 'image') && data.announcement.imageUrl && (
                                                 <img src={data.announcement.imageUrl} alt="Pengumuman" className="w-full rounded-lg shadow-sm object-contain max-h-[50vh]" />
                                             )}
-                                            {data.announcement.text && (
+                                            {(mode === 'both' || mode === 'text') && data.announcement.text && (
                                                 <div className="p-2 text-center text-md font-medium text-gray-800">
                                                     {data.announcement.text}
                                                 </div>
@@ -216,10 +231,9 @@
                             }
                         }
                     } else {
-                        // Cipta fail konfigurasi awal jika tiada
                         configRef.set({
                             menus: initialMenuItems,
-                            announcement: { active: false, text: "Selamat datang ke Portal SKPK Miri", showOnLoad: false, imageUrl: null }
+                            announcement: { active: false, text: "Selamat datang ke Portal SKPK Miri", showOnLoad: false, imageUrl: null, popupMode: 'both' }
                         });
                     }
                 }, (error) => {
@@ -263,7 +277,6 @@
                 
                 setIsUploading(true);
 
-                // Mampat dan tukar imej ke Base64 menggunakan Canvas
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
                 reader.onload = (event) => {
@@ -285,7 +298,7 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
                         
-                        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6); // Kualiti 60%
+                        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
                         saveAnnouncement({...announcement, imageUrl: compressedDataUrl});
                         setIsUploading(false);
                     };
@@ -399,7 +412,7 @@
                     <div className="w-full max-w-md bg-white shadow-2xl flex flex-col h-screen overflow-hidden relative">
                         
                         {/* Bahagian Atas (Header) */}
-                        <div className="bg-white p-4 border-b flex items-center justify-between shrink-0">
+                        <div className="bg-white p-4 border-b flex items-center justify-between shrink-0 z-20">
                             <div className="flex items-center gap-3">
                                 <button 
                                     className="relative focus:outline-none"
@@ -422,17 +435,22 @@
                             </div>
                         </div>
 
-                        {/* Banner Pengumuman Teks Di Bawah Header */}
+                        {}
+                        {/* Banner Pengumuman Bergerak (Marquee) Di Bawah Header */}
                         {announcement.active && announcement.text && (
-                            <div className="bg-amber-100/80 border-b border-amber-200 p-2 shrink-0 flex items-center justify-center gap-2">
-                                <Icon name="bell" size={14} className="text-amber-700 animate-pulse" />
-                                <span className="text-xs font-semibold text-amber-800 truncate px-1">{announcement.text}</span>
+                            <div className="bg-amber-100/80 border-b border-amber-200 p-2 shrink-0 flex items-center gap-2 overflow-hidden w-full z-10 relative">
+                                <div className="shrink-0 z-10 px-1 bg-amber-100">
+                                    <Icon name="bell" size={14} className="text-amber-700 animate-pulse" />
+                                </div>
+                                <div className="marquee-container flex-1">
+                                    <span className="marquee-content text-xs font-semibold text-amber-800">{announcement.text}</span>
+                                </div>
                             </div>
                         )}
 
                         <div className="flex-1 overflow-y-auto p-4 hide-scrollbar bg-slate-50">
                             
-                            {/* Paparan Alternatif: Mod Dashboard Admin ATAU Paparan Portal Biasa */}
+                            {}
                             {isAdminMode && showAdminDashboard ? (
                                 /* PAPARAN PENGURUSAN ADMIN */
                                 <div className="flex flex-col gap-4">
@@ -446,7 +464,7 @@
                                         </div>
                                     </div>
                                     
-                                    {/* Admin: Tetapan Pengumuman */}
+                                    {/* Admin: Tetapan Pengumuman & Pop-up */}
                                     <div className="bg-white p-4 rounded-2xl border shadow-sm">
                                         <h4 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
                                             <Icon name="bell-ring" size={16} className="text-amber-500" /> Pengumuman & Notis
@@ -456,21 +474,38 @@
                                                 <label className="text-xs font-semibold text-gray-700 flex-1">Aktifkan Notis Teks Bawah Logo?</label>
                                                 <input type="checkbox" checked={announcement.active} onChange={(e) => saveAnnouncement({...announcement, active: e.target.checked})} className="w-4 h-4 text-blue-600 rounded border-gray-300" />
                                             </div>
+                                            
                                             <div className="flex items-center justify-between bg-slate-50 p-2 rounded-lg border">
-                                                <label className="text-xs font-semibold text-gray-700 flex-1">Pop-up Gambar/Teks Semasa Buka Portal?</label>
+                                                <label className="text-xs font-semibold text-gray-700 flex-1">Pop-up Semasa Buka Portal?</label>
                                                 <input type="checkbox" checked={announcement.showOnLoad} onChange={(e) => saveAnnouncement({...announcement, showOnLoad: e.target.checked})} className="w-4 h-4 text-blue-600 rounded border-gray-300" />
                                             </div>
+
+                                            {announcement.showOnLoad && (
+                                                <div className="flex items-center justify-between bg-blue-50/50 p-2 rounded-lg border border-blue-100">
+                                                    <label className="text-xs font-semibold text-blue-800 flex-1">Mod Paparan Pop-up</label>
+                                                    <select 
+                                                        value={announcement.popupMode || 'both'} 
+                                                        onChange={(e) => saveAnnouncement({...announcement, popupMode: e.target.value})}
+                                                        className="border border-blue-200 rounded-md text-xs px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-700 font-medium"
+                                                    >
+                                                        <option value="both">Teks & Gambar</option>
+                                                        <option value="text">Teks Sahaja</option>
+                                                        <option value="image">Gambar Sahaja</option>
+                                                    </select>
+                                                </div>
+                                            )}
+
                                             <textarea 
                                                 value={announcement.text} 
                                                 onChange={(e) => saveAnnouncement({...announcement, text: e.target.value})}
                                                 placeholder="Taip teks pengumuman di sini..." 
-                                                className="w-full p-3 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+                                                className="w-full p-3 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none mt-2" 
                                                 rows="3"
                                             />
                                             
                                             {/* Muat Naik Gambar Pop-up Sahaja */}
                                             <div className="bg-slate-50 p-3 rounded-xl border">
-                                                <label className="text-xs font-semibold text-gray-700 block mb-2">Gambar Pengumuman (Tampil Di Pop-up Sahaja)</label>
+                                                <label className="text-xs font-semibold text-gray-700 block mb-2">Gambar Pengumuman (Untuk Pop-up)</label>
                                                 
                                                 {announcement.imageUrl && (
                                                     <div className="relative mb-3 inline-block">
@@ -487,12 +522,12 @@
                                                     className="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
                                                 />
                                                 {isUploading && <p className="text-[10px] text-blue-500 font-medium mt-1 animate-pulse">Sedang memproses gambar...</p>}
-                                                <p className="text-[10px] text-gray-400 mt-1">Sila pilih fail imej berukuran kecil (Sistem akan memampatkan imej).</p>
+                                                <p className="text-[10px] text-gray-400 mt-1">Sila pilih fail imej berukuran kecil.</p>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* Admin: Senarai Keseluruhan Menu */}
+                                    {}
                                     <div className="bg-white p-4 rounded-2xl border shadow-sm">
                                         <div className="flex items-center justify-between mb-4">
                                             <h4 className="text-sm font-bold text-gray-700 flex items-center gap-2">
@@ -530,7 +565,6 @@
                                     <div className="h-4"></div>
                                 </div>
                             ) : (
-                                /* PAPARAN PORTAL BIASA UNTUK PENGGUNA */
                                 <div className="flex flex-col gap-3">
                                     {menuItems.map(item => {
                                         const isDropdownRekod = item.actionType === 'dropdown-rekod';
@@ -587,6 +621,7 @@
                             )}
                         </div>
 
+                        {}
                         {/* Bar Navigasi Bawah Untuk Admin Apabila Log Masuk */}
                         {isAdminMode && (
                             <div className="bg-slate-800 text-white p-3 shrink-0 flex items-center justify-between rounded-t-xl shadow-lg mt-auto z-10 relative">
